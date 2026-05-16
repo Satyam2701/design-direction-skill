@@ -1,5 +1,8 @@
 # design-direction
 
+[![npm](https://img.shields.io/npm/v/design-direction-skill)](https://www.npmjs.com/package/design-direction-skill)
+[![GitHub](https://img.shields.io/badge/github-Satyam2701%2Fdesign--direction--skill-blue)](https://github.com/Satyam2701/design-direction-skill)
+
 A Claude Code skill for standalone designers. Takes a vague product idea and turns it into a complete, actionable design direction through three collaborative phases.
 
 ---
@@ -36,14 +39,14 @@ npx design-direction-skill --global
 ```bash
 mkdir -p .claude/skills
 curl -o .claude/skills/design-direction.md \
-  https://raw.githubusercontent.com/satyamtiwari/design-direction-skill/main/skills/design-direction/SKILL.md
+  https://raw.githubusercontent.com/Satyam2701/design-direction-skill/main/skills/design-direction/SKILL.md
 ```
 
 **Option C — Manual (global):**
 ```bash
 mkdir -p ~/.claude/skills
 curl -o ~/.claude/skills/design-direction.md \
-  https://raw.githubusercontent.com/satyamtiwari/design-direction-skill/main/skills/design-direction/SKILL.md
+  https://raw.githubusercontent.com/Satyam2701/design-direction-skill/main/skills/design-direction/SKILL.md
 ```
 
 ---
@@ -127,6 +130,13 @@ Drop it into Figma notes, Notion, Linear, or hand it directly to a developer.
 
 - Claude Code (CLI, desktop, or IDE extension)
 - No API keys, no external tools, no setup beyond copying the skill file
+
+---
+
+## Links
+
+- **npm:** https://www.npmjs.com/package/design-direction-skill
+- **GitHub:** https://github.com/Satyam2701/design-direction-skill
 
 ---
 
