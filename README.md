@@ -133,13 +133,6 @@ Drop it into Figma notes, Notion, Linear, or hand it directly to a developer.
 
 ---
 
-## Links
-
-- **npm:** https://www.npmjs.com/package/design-direction-skill
-- **GitHub:** https://github.com/Satyam2701/design-direction-skill
-
----
-
 ## License
 
 MIT — free to use, share, and modify.
