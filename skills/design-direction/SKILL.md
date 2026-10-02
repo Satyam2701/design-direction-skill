@@ -148,6 +148,10 @@ developer gets.
      Google Fonts, and always end each font stack with a generic fallback.
    - List radius tokens smallest first. The first is used for buttons and inputs, the second for cards.
    - Set `meta.accentAsText` to `true` if Accent is ever used for text.
+   - Add `meta.copy` so the tile speaks in the product's voice, not placeholder text. Keys (all
+     optional): `h1`, `h2`, `h3`, `body`, `caption`, `label`, `primaryAction`, `secondaryAction`,
+     `tertiaryAction`, `tag`, `success`, `warning`, `error`, `info`. Write them as real UI copy for this
+     product, e.g. `"primaryAction": "Send invoice"`, `"success": "Paid and reconciled."`.
 
 2. **Run the generator.** This skill's directory is the base directory shown when the skill loads:
 

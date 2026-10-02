@@ -294,17 +294,28 @@ function googleFontLinks(t) {
     .join("\n");
 }
 
-const SAMPLE_TEXT = {
-  h1: "The quiet hour begins",
-  h2: "Make room for what matters",
-  h3: "A small ritual, every day",
+// Product-neutral sample copy; meta.copy overrides any key with copy in the brand's voice
+const DEFAULT_COPY = {
+  h1: "Headlines set the tone",
+  h2: "Section titles guide the eye",
+  h3: "Card titles stay short",
   body: "Good design gets out of the way. It sets a rhythm, holds a tone, and lets the content breathe — so the person on the other side can focus on what they came for.",
   caption: "Updated just now · 4 min read",
   label: "SECTION LABEL",
+  primaryAction: "Get started",
+  secondaryAction: "Save",
+  tertiaryAction: "Not now",
+  tag: "New",
+  success: "Your changes have been saved.",
+  warning: "You're offline — changes will sync later.",
+  error: "We couldn't load this page. Try again.",
+  info: "You can change this anytime in Settings.",
 };
 
 function renderTile(t, results) {
   const name = esc(t.meta.name);
+  const copy = {};
+  for (const [key, text] of Object.entries({ ...DEFAULT_COPY, ...(t.meta.copy || {}) })) copy[key] = esc(text);
   const tone = (t.meta.toneWords || []).map((w) => `<span class="chip">${esc(w)}</span>`).join("");
   const manifesto = t.meta.manifesto ? `<p class="manifesto">${esc(t.meta.manifesto)}</p>` : "";
   const radiusKeys = Object.keys(t.radius);
@@ -344,7 +355,7 @@ function renderTile(t, results) {
     return `
       <div class="type-row">
         <div class="type-meta"><strong>${label}</strong><span class="muted">${esc(v.fontSize)} / ${esc(v.fontWeight)} / ${esc(v.lineHeight)}${ls !== "0" ? ` / ${esc(ls)}` : ""}</span></div>
-        <div class="t-${key}">${SAMPLE_TEXT[key]}</div>
+        <div class="t-${key}">${copy[key]}</div>
       </div>`;
   }).join("");
 
@@ -354,7 +365,8 @@ function renderTile(t, results) {
   const radii = Object.entries(t.radius).map(([key, tok]) => `
         <div class="radius-box" style="border-radius: var(--radius-${key})"><code>${esc(key)}</code><span class="muted">${esc(tok.$value)}</span></div>`).join("");
 
-  const alerts = [["success", "Saved", "Your session has been added to your journal."], ["warning", "Heads up", "You're offline — changes will sync later."], ["error", "Something went wrong", "We couldn't load your sessions. Try again."], ["info", "Tip", "Long-press any session to add it to favourites."]]
+  const alerts = [["success", "Success"], ["warning", "Warning"], ["error", "Error"], ["info", "Info"]]
+    .map(([key, title]) => [key, title, copy[key]])
     .map(([key, title, body]) => `
         <div class="alert" style="--tone: var(--color-${key})"><strong>${title}</strong><span>${body}</span></div>`).join("");
 
@@ -488,9 +500,9 @@ footer { margin-top: 96px; font-size: 12px; color: var(--color-neutral-600); }
       <div class="panel">
         <h3>Buttons</h3>
         <div class="row">
-          <button class="btn btn-primary" type="button">Begin session</button>
-          <button class="btn btn-secondary" type="button">Save</button>
-          <button class="btn btn-ghost" type="button">Not now</button>
+          <button class="btn btn-primary" type="button">${copy.primaryAction}</button>
+          <button class="btn btn-secondary" type="button">${copy.secondaryAction}</button>
+          <button class="btn btn-ghost" type="button">${copy.tertiaryAction}</button>
         </div>
         <h3>Inputs</h3>
         <label class="field">Email<input class="input" type="email" placeholder="you@example.com"></label>
@@ -501,9 +513,9 @@ footer { margin-top: 96px; font-size: 12px; color: var(--color-neutral-600); }
         <article class="card">
           <div class="card-media"></div>
           <div class="card-body">
-            <span class="card-tag">New</span>
-            <div class="t-h3">${SAMPLE_TEXT.h3}</div>
-            <div class="t-caption muted">${SAMPLE_TEXT.caption}</div>
+            <span class="card-tag">${copy.tag}</span>
+            <div class="t-h3">${copy.h3}</div>
+            <div class="t-caption muted">${copy.caption}</div>
           </div>
         </article>
       </div>

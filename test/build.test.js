@@ -122,6 +122,22 @@ const tests = {
     assert.ok(html.includes('data-theme'), "theme toggle");
   },
 
+  "style tile: uses meta.copy in brand voice, escaped"() {
+    const t = fixture();
+    t.meta.copy = { h1: "Money, handled", primaryAction: "Send invoice", success: "Paid & reconciled <today>" };
+    const html = runBuild(t).read("style-tile.html");
+    assert.ok(html.includes("Money, handled"));
+    assert.ok(html.includes(">Send invoice<"));
+    assert.ok(html.includes("Paid &amp; reconciled &lt;today&gt;"));
+  },
+
+  "style tile: default copy is product-neutral"() {
+    const html = runBuild(fixture()).read("style-tile.html");
+    for (const themed of ["quiet hour", "session", "journal", "ritual"]) {
+      assert.ok(!html.toLowerCase().includes(themed), `default copy mentions "${themed}"`);
+    }
+  },
+
   "style tile: escapes HTML in meta text"() {
     const t = fixture();
     t.meta.name = "<script>alert(1)</script>";
