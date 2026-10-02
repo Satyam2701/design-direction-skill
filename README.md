@@ -17,7 +17,9 @@ You describe your idea in plain language. Claude picks up what you've already sa
 Tone words, color story, typography personality, visual do's and don'ts, and a design manifesto. Something you can pin above your desk.
 
 **Phase 2 — Concrete Spec**
-A full palette in light and dark mode — including semantic success, warning, error, and info colors — with every text pairing checked against WCAG AA contrast. Plus type scale, spacing system, and component style rules. Ready to paste into Figma or hand to a developer.
+A full palette in light and dark mode — including semantic success, warning, error, and info colors — with every text pairing checked against WCAG AA contrast. Plus type scale, spacing system, and component style rules.
+
+Phase 2 also generates a **visual style tile** — one HTML page showing your palette, type specimen, spacing, and real components (buttons, inputs, cards, alerts) in your product's own voice, with a light/dark toggle — plus **developer-ready tokens**: CSS variables, a Tailwind v4 theme, and a W3C design-tokens JSON that Figma token plugins can import. Everything is generated from one `tokens.json`, so what you approve is exactly what developers get.
 
 **Phase 3 — Feature Thinking**
 User flows, feature ideas, and micro-interaction concepts — all tied to your specific direction and audience.
@@ -37,16 +39,20 @@ npx design-direction-skill --global
 
 **Option B — Manual (project level):**
 ```bash
-mkdir -p .claude/skills/design-direction
+mkdir -p .claude/skills/design-direction/scripts
 curl -o .claude/skills/design-direction/SKILL.md \
   https://raw.githubusercontent.com/Satyam2701/design-direction-skill/main/skills/design-direction/SKILL.md
+curl -o .claude/skills/design-direction/scripts/build.js \
+  https://raw.githubusercontent.com/Satyam2701/design-direction-skill/main/skills/design-direction/scripts/build.js
 ```
 
 **Option C — Manual (global):**
 ```bash
-mkdir -p ~/.claude/skills/design-direction
+mkdir -p ~/.claude/skills/design-direction/scripts
 curl -o ~/.claude/skills/design-direction/SKILL.md \
   https://raw.githubusercontent.com/Satyam2701/design-direction-skill/main/skills/design-direction/SKILL.md
+curl -o ~/.claude/skills/design-direction/scripts/build.js \
+  https://raw.githubusercontent.com/Satyam2701/design-direction-skill/main/skills/design-direction/scripts/build.js
 ```
 
 ---
@@ -116,20 +122,26 @@ Claude:  ── Feature Thinking ───────────────�
 
 ## Output
 
-At the end of the session, Claude offers to save everything as a single shareable markdown file:
+Everything lands in one folder in your project:
 
 ```
-design-direction-wellness-app-2026-05-16.md
+design-direction-wellness-app/
+├── style-tile.html      ← open in a browser; light/dark toggle
+├── tokens.json          ← source of truth (W3C design tokens; Figma token plugins can import it)
+├── tokens.css           ← CSS custom properties, light + dark
+├── tailwind.css         ← Tailwind v4 @theme
+└── design-direction-wellness-app-2026-10-03.md   ← the full direction, saved at the end
 ```
 
-Drop it into Figma notes, Notion, Linear, or hand it directly to a developer.
+Revisions regenerate the files, so the tile always matches the spec. Drop the markdown into Figma notes, Notion, or Linear, and hand the token files straight to a developer.
 
 ---
 
 ## Requirements
 
 - Claude Code (CLI, desktop, or IDE extension)
-- No API keys, no external tools, no setup beyond copying the skill file
+- Node.js 16+ for the style tile and token files (if `npx` works, you have it). Without Node, the skill still runs and produces the spec as text.
+- No API keys, no dependencies
 
 ---
 
