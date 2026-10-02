@@ -8,6 +8,24 @@ const INSTALLER = path.join(__dirname, "..", "bin", "install.js");
 const SKILL_SRC = path.join(__dirname, "..", "skills", "design-direction", "SKILL.md");
 const SKILL = fs.readFileSync(SKILL_SRC, "utf8");
 
+// Minimal frontmatter parser: handles `key: value` and folded `key: >` blocks
+function parseFrontmatter(text) {
+  const match = text.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return null;
+  const fields = {};
+  let key = null;
+  for (const line of match[1].split("\n")) {
+    const kv = line.match(/^([a-z-]+):\s*(.*)$/);
+    if (kv) {
+      key = kv[1];
+      fields[key] = kv[2] === ">" ? "" : kv[2];
+    } else if (key && /^\s+\S/.test(line)) {
+      fields[key] = (fields[key] + " " + line.trim()).trim();
+    }
+  }
+  return fields;
+}
+
 function sandbox() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dds-test-"));
   const home = path.join(root, "home");
@@ -78,6 +96,29 @@ const tests = {
     assert.ok(match, "missing YAML frontmatter");
     assert.match(match[1], /^name: design-direction$/m);
     assert.match(match[1], /^description:/m);
+  },
+
+  "description is at most 400 characters and covers key triggers"() {
+    const { description } = parseFrontmatter(SKILL);
+    assert.ok(description.length <= 400, `description is ${description.length} chars`);
+    for (const phrase of ["style guide", "moodboard", "brand direction", "color palette"]) {
+      assert.ok(description.includes(phrase), `description missing "${phrase}"`);
+    }
+  },
+
+  "Phase 1 has smart intake with quick mode"() {
+    for (const marker of ["### Intake", "Start by extracting", "all at once"]) {
+      assert.ok(SKILL.includes(marker), `SKILL.md missing "${marker}"`);
+    }
+  },
+
+  "Phase 2 palette has dark mode, semantic roles and contrast check"() {
+    assert.ok(SKILL.includes("| Role | Light | Dark | Usage |"), "missing Light/Dark palette header");
+    for (const role of ["On Primary", "Success", "Warning", "Error", "Info"]) {
+      assert.match(SKILL, new RegExp(`^\\| ${role} \\|`, "m"), `palette missing role "${role}"`);
+    }
+    assert.ok(SKILL.includes("Contrast Check"), "missing Contrast Check section");
+    assert.ok(SKILL.includes("Compute, never estimate"), "missing compute-not-estimate rule");
   },
 };
 

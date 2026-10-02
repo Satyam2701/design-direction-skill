@@ -1,10 +1,11 @@
 ---
 name: design-direction
 description: >
-  Use when a designer wants to go from a vague idea to a concrete design direction.
-  Triggers on: "I'm designing a [product] that should feel...", "help me nail the vibe for...",
-  "I want something that feels...", "give me a design direction for...",
-  "I'm not sure about the direction for my...", "what should my design feel like?"
+  Turns a vague product idea into a complete design direction: mood brief, concrete spec
+  (palette with dark mode and contrast checks, type scale, spacing, components), and feature
+  thinking. Use when a designer asks for a design direction, style guide, moodboard, brand
+  direction, or color palette, or says "I'm designing a [product] that should feel..." or
+  "help me nail the vibe for...".
 ---
 
 # Design Direction
