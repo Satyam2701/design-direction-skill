@@ -117,17 +117,47 @@ Present the spec using this exact format:
 
 **Color Palette**
 
-| Role | Hex | Usage |
-|---|---|---|
-| Primary | `#______` | [Main actions, key UI elements] |
-| Secondary | `#______` | [Supporting elements, hover states] |
-| Accent | `#______` | [Highlights, badges, CTAs] |
-| Background | `#______` | [Page/app background] |
-| Surface | `#______` | [Cards, modals, panels] |
-| Neutral 100 | `#______` | [Lightest — dividers, subtle bg] |
-| Neutral 300 | `#______` | [Borders, disabled states] |
-| Neutral 600 | `#______` | [Secondary text] |
-| Neutral 900 | `#______` | [Primary text] |
+| Role | Light | Dark | Usage |
+|---|---|---|---|
+| Primary | `#______` | `#______` | [Main actions, key UI elements] |
+| On Primary | `#______` | `#______` | [Text and icons on Primary] |
+| Secondary | `#______` | `#______` | [Supporting elements, hover states] |
+| Accent | `#______` | `#______` | [Highlights, badges, CTAs] |
+| Background | `#______` | `#______` | [Page/app background] |
+| Surface | `#______` | `#______` | [Cards, modals, panels] |
+| Neutral 100 | `#______` | `#______` | [Subtlest — dividers, subtle bg] |
+| Neutral 300 | `#______` | `#______` | [Borders, disabled states] |
+| Neutral 600 | `#______` | `#______` | [Secondary text] |
+| Neutral 900 | `#______` | `#______` | [Primary text] |
+| Success | `#______` | `#______` | [Confirmations, positive states] |
+| Warning | `#______` | `#______` | [Caution, pending states] |
+| Error | `#______` | `#______` | [Errors, destructive actions] |
+| Info | `#______` | `#______` | [Neutral notices, tips] |
+
+**Dark mode:** derive it from the same mood — never a straight inversion. Use tinted dark surfaces
+(never pure `#000000`), lighten Primary and Accent enough to hold contrast on dark surfaces, and lower
+saturation for large areas. Roles keep their meaning: in dark mode, Neutral 900 is still the primary
+text color, so it becomes the lightest neutral. Tune Success/Warning/Error/Info toward the palette's
+temperature so they feel native, not stock.
+
+**Contrast Check** *(WCAG 2.2 AA)*
+
+| Pair | Light | Dark | Needs |
+|---|---|---|---|
+| Neutral 900 on Background | [ratio] ✓ | [ratio] ✓ | 4.5:1 |
+| Neutral 900 on Surface | [ratio] ✓ | [ratio] ✓ | 4.5:1 |
+| Neutral 600 on Background | [ratio] ✓ | [ratio] ✓ | 4.5:1 |
+| On Primary on Primary | [ratio] ✓ | [ratio] ✓ | 4.5:1 |
+| Accent on Background *(only if Accent is used as text)* | [ratio] ✓ | [ratio] ✓ | 4.5:1 |
+
+- Normal text needs 4.5:1. Large text (24px+, or 18.66px+ bold) and UI components such as input
+  borders and focus rings need 3:1.
+- If a pair fails, adjust that color's lightness (keep its hue) until it passes, update the palette
+  table, and recheck. Present only the final, passing values.
+- **Compute, never estimate.** If you can run code, calculate every ratio with a short script. If you
+  can't, label the ratio columns "approximate" and give the formula so the user can verify:
+  linearize each sRGB channel `c` (0–1) as `c ≤ 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ^ 2.4`,
+  luminance `L = 0.2126 R + 0.7152 G + 0.0722 B`, ratio `(L_lighter + 0.05) / (L_darker + 0.05)`.
 
 **Typography**
 
