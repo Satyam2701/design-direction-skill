@@ -11,13 +11,13 @@ A Claude Code skill for standalone designers. Takes a vague product idea and tur
 
 Most designers know the feeling: you have a product to design but the brief is fuzzy. "Make it feel modern and clean" is not a direction. This skill fixes that.
 
-You describe your idea in plain language. Claude asks focused questions, then walks you through three phases:
+You describe your idea in plain language. Claude picks up what you've already said, asks only what's missing (one at a time, or all at once if you prefer), then walks you through three phases:
 
 **Phase 1 — Mood Brief**
 Tone words, color story, typography personality, visual do's and don'ts, and a design manifesto. Something you can pin above your desk.
 
 **Phase 2 — Concrete Spec**
-Hex codes, type scale, spacing system, and component style rules. Ready to paste into Figma or hand to a developer.
+A full palette in light and dark mode — including semantic success, warning, error, and info colors — with every text pairing checked against WCAG AA contrast. Plus type scale, spacing system, and component style rules. Ready to paste into Figma or hand to a developer.
 
 **Phase 3 — Feature Thinking**
 User flows, feature ideas, and micro-interaction concepts — all tied to your specific direction and audience.
