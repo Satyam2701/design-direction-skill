@@ -16,8 +16,8 @@ if (isHelp) {
 design-direction-skill installer
 
 Usage:
-  npx design-direction-skill           Install into current project (.claude/skills/)
-  npx design-direction-skill --global  Install globally (~/.claude/skills/)
+  npx design-direction-skill           Install into current project (.claude/skills/design-direction/)
+  npx design-direction-skill --global  Install globally (~/.claude/skills/design-direction/)
 
 Options:
   -g, --global   Install globally for all projects
@@ -26,11 +26,20 @@ Options:
   process.exit(0);
 }
 
-const targetDir = isGlobal
+const skillsDir = isGlobal
   ? path.join(os.homedir(), ".claude", "skills")
   : path.join(process.cwd(), ".claude", "skills");
 
-const targetFile = path.join(targetDir, `${SKILL_NAME}.md`);
+// Claude Code loads skills from .claude/skills/<name>/SKILL.md
+const targetDir = path.join(skillsDir, SKILL_NAME);
+const targetFile = path.join(targetDir, "SKILL.md");
+
+// v1.0.0 installed to .claude/skills/design-direction.md, which Claude Code never loads
+const legacyFile = path.join(skillsDir, `${SKILL_NAME}.md`);
+if (fs.existsSync(legacyFile)) {
+  fs.unlinkSync(legacyFile);
+  console.log(`✗ Removed old skill file from a previous version:\n  ${legacyFile}`);
+}
 
 // Create target directory if it doesn't exist
 if (!fs.existsSync(targetDir)) {

@@ -22,9 +22,7 @@
   "scripts": {
     "test": "node test/install.test.js",
     "install-skill": "node bin/install.js",
-    "install-skill:global": "node bin/install.js --global",
-    "playground": "npx -y http-server playground -o",
-    "portfolio": "npx -y http-server portfolio -o"
+    "install-skill:global": "node bin/install.js --global"
   },
   "files": [
     "skills/",
@@ -36,6 +34,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/satyamtiwari/design-direction-skill.git"
+    "url": "git+https://github.com/Satyam2701/design-direction-skill.git"
+  },
+  "homepage": "https://github.com/Satyam2701/design-direction-skill#readme",
+  "bugs": {
+    "url": "https://github.com/Satyam2701/design-direction-skill/issues"
   }
 }

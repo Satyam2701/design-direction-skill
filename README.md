@@ -37,15 +37,15 @@ npx design-direction-skill --global
 
 **Option B — Manual (project level):**
 ```bash
-mkdir -p .claude/skills
-curl -o .claude/skills/design-direction.md \
+mkdir -p .claude/skills/design-direction
+curl -o .claude/skills/design-direction/SKILL.md \
   https://raw.githubusercontent.com/Satyam2701/design-direction-skill/main/skills/design-direction/SKILL.md
 ```
 
 **Option C — Manual (global):**
 ```bash
-mkdir -p ~/.claude/skills
-curl -o ~/.claude/skills/design-direction.md \
+mkdir -p ~/.claude/skills/design-direction
+curl -o ~/.claude/skills/design-direction/SKILL.md \
   https://raw.githubusercontent.com/Satyam2701/design-direction-skill/main/skills/design-direction/SKILL.md
 ```
 
