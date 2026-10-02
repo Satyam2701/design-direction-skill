@@ -20,7 +20,7 @@
     "design-direction-skill": "bin/install.js"
   },
   "scripts": {
-    "test": "node test/install.test.js",
+    "test": "node test/install.test.js && node test/build.test.js",
     "install-skill": "node bin/install.js",
     "install-skill:global": "node bin/install.js --global"
   },
