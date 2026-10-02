@@ -5,7 +5,15 @@ const path = require("path");
 const os = require("os");
 
 const SKILL_NAME = "design-direction";
-const SKILL_SRC = path.join(__dirname, "..", "skills", SKILL_NAME, "SKILL.md");
+const SKILL_SRC_DIR = path.join(__dirname, "..", "skills", SKILL_NAME);
+
+// Relative paths of every file in the skill directory (SKILL.md, scripts/...)
+function listFiles(dir, base = dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    return entry.isDirectory() ? listFiles(full, base) : [path.relative(base, full)];
+  });
+}
 
 const args = process.argv.slice(2);
 const isGlobal = args.includes("--global") || args.includes("-g");
@@ -41,25 +49,28 @@ if (fs.existsSync(legacyFile)) {
   console.log(`✗ Removed old skill file from a previous version:\n  ${legacyFile}`);
 }
 
-// Create target directory if it doesn't exist
-if (!fs.existsSync(targetDir)) {
-  fs.mkdirSync(targetDir, { recursive: true });
-}
+const files = listFiles(SKILL_SRC_DIR);
+const isCurrent = (rel) => {
+  const dest = path.join(targetDir, rel);
+  return fs.existsSync(dest) && fs.readFileSync(dest).equals(fs.readFileSync(path.join(SKILL_SRC_DIR, rel)));
+};
 
 // Check if already installed
 if (fs.existsSync(targetFile)) {
-  const existing = fs.readFileSync(targetFile, "utf8");
-  const incoming = fs.readFileSync(SKILL_SRC, "utf8");
-  if (existing === incoming) {
-    console.log(`✓ design-direction skill is already up to date at:\n  ${targetFile}`);
+  if (files.every(isCurrent)) {
+    console.log(`✓ design-direction skill is already up to date at:\n  ${targetDir}`);
     process.exit(0);
   }
-  console.log(`↻ Updating existing skill at:\n  ${targetFile}`);
+  console.log(`↻ Updating existing skill at:\n  ${targetDir}`);
 } else {
-  console.log(`Installing design-direction skill to:\n  ${targetFile}`);
+  console.log(`Installing design-direction skill to:\n  ${targetDir}`);
 }
 
-fs.copyFileSync(SKILL_SRC, targetFile);
+for (const rel of files) {
+  const dest = path.join(targetDir, rel);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(path.join(SKILL_SRC_DIR, rel), dest);
+}
 
 console.log(`
 ✓ Done! The design-direction skill is ready.

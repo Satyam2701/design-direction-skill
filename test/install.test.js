@@ -60,6 +60,23 @@ const tests = {
     assert.ok(!fs.existsSync(path.join(box.project, ".claude")), "should not touch project dir");
   },
 
+  "installs the scripts folder alongside SKILL.md"() {
+    const box = sandbox();
+    run(box);
+    const installed = path.join(box.project, ".claude", "skills", "design-direction", "scripts", "build.js");
+    const source = path.join(__dirname, "..", "skills", "design-direction", "scripts", "build.js");
+    assert.strictEqual(fs.readFileSync(installed, "utf8"), fs.readFileSync(source, "utf8"));
+  },
+
+  "updates when only a script changed"() {
+    const box = sandbox();
+    run(box);
+    const installed = path.join(box.project, ".claude", "skills", "design-direction", "scripts", "build.js");
+    fs.writeFileSync(installed, "old");
+    assert.match(run(box), /Updating existing skill/);
+    assert.notStrictEqual(fs.readFileSync(installed, "utf8"), "old");
+  },
+
   "re-running reports already up to date"() {
     const box = sandbox();
     run(box);
