@@ -137,6 +137,12 @@ const tests = {
     assert.ok(SKILL.includes("Contrast Check"), "missing Contrast Check section");
     assert.ok(SKILL.includes("Compute, never estimate"), "missing compute-not-estimate rule");
   },
+
+  "Phase 2 generates tokens and the style tile via build.js"() {
+    for (const marker of ["scripts/build.js", "tokens.json", "style-tile.html", "tokens.css", "tailwind.css", "If Node isn't available", "design-direction-<slug>/"]) {
+      assert.ok(SKILL.includes(marker), `SKILL.md missing "${marker}"`);
+    }
+  },
 };
 
 let failed = 0;

@@ -109,6 +109,71 @@ Do not proceed to Phase 2 until the user says yes.
 Derive all values directly from the approved Mood Brief. Do not ask more questions.
 The brief contains everything you need — translate feeling into numbers.
 
+### Generate tokens and the style tile
+
+The spec is built from one source of truth, `tokens.json`. A generator script in this skill turns it
+into a visual style tile and developer-ready exports, so what the designer sees is exactly what the
+developer gets.
+
+1. **Write `design-direction-<slug>/tokens.json`** in the current working directory, where `<slug>`
+   is the product name in kebab-case (e.g. `design-direction-stillwater/`). Use this shape:
+
+   ```json
+   {
+     "meta": { "name": "Stillwater", "toneWords": ["quiet confidence", "earned slowness"],
+               "manifesto": "[the approved manifesto]", "accentAsText": false },
+     "color": {
+       "primary": { "$type": "color", "$value": "#55705A", "$description": "Main actions, focus rings",
+                    "$extensions": { "design-direction": { "dark": "#9DB59F" } } }
+     },
+     "font": {
+       "heading": { "$type": "fontFamily", "$value": ["Fraunces", "Georgia", "serif"] },
+       "body":    { "$type": "fontFamily", "$value": ["Inter", "system-ui", "sans-serif"] }
+     },
+     "typography": {
+       "h1": { "$type": "typography", "$value": { "fontFamily": "{font.heading}", "fontSize": "48px",
+               "fontWeight": 300, "lineHeight": 1.15, "letterSpacing": "-0.01em" } }
+     },
+     "spacing": { "1": { "$type": "dimension", "$value": "4px" } },
+     "radius":  { "sm": { "$type": "dimension", "$value": "8px" } },
+     "shadow":  { "card": { "$type": "shadow", "$value": "0 2px 8px rgba(0,0,0,0.06)" } }
+   }
+   ```
+
+   - `color` needs all 14 roles from the palette table below, as kebab-case keys (`primary`,
+     `on-primary`, `secondary`, `accent`, `background`, `surface`, `neutral-100`, `neutral-300`,
+     `neutral-600`, `neutral-900`, `success`, `warning`, `error`, `info`). Each needs a light
+     `$value` and a dark value, both `#RRGGBB`. `$description` is optional; it becomes the Usage column.
+   - `typography` needs `h1`, `h2`, `h3`, `body`, `caption` and `label`. Use fonts available on
+     Google Fonts, and always end each font stack with a generic fallback.
+   - List radius tokens smallest first. The first is used for buttons and inputs, the second for cards.
+   - Set `meta.accentAsText` to `true` if Accent is ever used for text.
+
+2. **Run the generator.** This skill's directory is the base directory shown when the skill loads:
+
+   ```bash
+   node <skill-base-dir>/scripts/build.js design-direction-<slug>/tokens.json
+   ```
+
+   It writes `style-tile.html`, `tokens.css` (CSS variables, light and dark) and `tailwind.css` (a
+   Tailwind v4 `@theme`) next to `tokens.json`. It also prints the Color Palette and Contrast Check
+   tables as markdown.
+   - **Exit 1:** a contrast pair failed (listed as `FAIL ...`). Adjust that color's lightness, keeping
+     its hue, and run again. Repeat until it exits 0. Never present failing values.
+   - **Exit 2:** `tokens.json` is invalid (listed as `ERROR ...`). Fix it and run again.
+
+3. **Present the spec** in the format below. Paste the two tables the generator printed exactly as
+   printed, then write the remaining sections.
+
+4. **Open the style tile:** `open design-direction-<slug>/style-tile.html` on macOS, `xdg-open` on
+   Linux. If you can't open it, give the user the path. Tell them it has a light/dark toggle.
+
+**If Node isn't available** (`node` is missing or the script can't run), skip the generator and
+produce the tables yourself following the contrast rules below, with ratios labeled "approximate".
+If you can write files, hand-write `tokens.css` and a simple `style-tile.html` into the same folder.
+
+**Revisions:** edit `tokens.json` and re-run the generator. Never hand-edit the generated files.
+
 Present the spec using this exact format:
 
 ---
@@ -148,14 +213,16 @@ temperature so they feel native, not stock.
 | Neutral 900 on Surface | [ratio] ✓ | [ratio] ✓ | 4.5:1 |
 | Neutral 600 on Background | [ratio] ✓ | [ratio] ✓ | 4.5:1 |
 | On Primary on Primary | [ratio] ✓ | [ratio] ✓ | 4.5:1 |
+| Primary on Background (UI) | [ratio] ✓ | [ratio] ✓ | 3:1 |
 | Accent on Background *(only if Accent is used as text)* | [ratio] ✓ | [ratio] ✓ | 4.5:1 |
 
 - Normal text needs 4.5:1. Large text (24px+, or 18.66px+ bold) and UI components such as input
   borders and focus rings need 3:1.
 - If a pair fails, adjust that color's lightness (keep its hue) until it passes, update the palette
   table, and recheck. Present only the final, passing values.
-- **Compute, never estimate.** If you can run code, calculate every ratio with a short script. If you
-  can't, label the ratio columns "approximate" and give the formula so the user can verify:
+- **Compute, never estimate.** The generator computes every ratio. Without it, calculate them with a
+  short script if you can run code. If you can't, label the ratio columns "approximate" and give the
+  formula so the user can verify:
   linearize each sRGB channel `c` (0–1) as `c ≤ 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ^ 2.4`,
   luminance `L = 0.2126 R + 0.7152 G + 0.0722 B`, ratio `(L_lighter + 0.05) / (L_darker + 0.05)`.
 
@@ -187,10 +254,14 @@ Scale: `[4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96]`
 
 ---
 
-After presenting the Spec, ask:
+Close the spec with the generated files:
 
-> "Does this spec match the direction we landed on? Anything to tweak — colors feel off, type
-> scale too big or small, anything like that?"
+> **Files** — `design-direction-<slug>/`: `style-tile.html` · `tokens.css` · `tailwind.css` · `tokens.json`
+
+After presenting the Spec and opening the style tile, ask:
+
+> "Take a look at the style tile — flip it to dark mode too. Does this match the direction we landed
+> on? Anything to tweak — colors feel off, type scale too big or small, anything like that?"
 
 Wait for explicit approval. If the user wants changes, revise and ask again.
 Do not proceed to Phase 3 until the user says yes.
@@ -257,6 +328,6 @@ Once the user approves Phase 3, offer to save everything:
 > Want me to save it all as a single shareable markdown file you can drop into Figma notes,
 > a Notion doc, or hand to a developer?"
 
-If yes, compile Phases 1–3 into a single clean document and save it as:
-`design-direction-[product-name]-[YYYY-MM-DD].md`
-in the current working directory.
+If yes, compile Phases 1–3 into a single clean document and save it as
+`design-direction-<slug>/design-direction-<slug>-[YYYY-MM-DD].md`, next to the style tile and token
+files, so the whole direction lives in one folder.
