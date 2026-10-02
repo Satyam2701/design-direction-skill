@@ -133,6 +133,19 @@ Drop it into Figma notes, Notion, Linear, or hand it directly to a developer.
 
 ---
 
+## Releasing
+
+Publishing is automated via [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) — no tokens or 2FA prompts.
+
+```bash
+npm version patch   # bumps package.json, commits, and tags vX.Y.Z
+git push origin main --follow-tags
+```
+
+The tag triggers `.github/workflows/publish.yml`, which runs the tests and publishes to npm with provenance.
+
+---
+
 ## License
 
 MIT — free to use, share, and modify.
