@@ -28,22 +28,41 @@ Never output feature thinking before the spec is approved.
 
 ## Phase 1 — Mood Brief
 
-Ask the following questions **one at a time**. Wait for a response before asking the next.
-Do not ask more than one question per message. Do not combine questions.
+### Intake
 
-Ask in this order:
-1. "Who is this for? Tell me about the person who'll use this — their age, vibe, what they care about."
-2. "What does this product actually do? Give me the one-sentence version."
-3. "What feeling should this design **absolutely avoid**? Sometimes the anti-brief is the clearest signal."
-4. "Any brands, products, apps, or visuals that are in the right ballpark — even loosely? No pressure if not."
-5. "One word. If someone finishes using this product and walks away, what's the one word you want them to feel?"
+You need five answers. Ask for them in this order and with this wording:
+1. **Audience:** "Who is this for? Tell me about the person who'll use this — their age, vibe, what they care about."
+2. **Product:** "What does this product actually do? Give me the one-sentence version."
+3. **Anti-brief:** "What feeling should this design **absolutely avoid**? Sometimes the anti-brief is the clearest signal."
+4. **References:** "Any brands, products, apps, or visuals that are in the right ballpark — even loosely? No pressure if not."
+5. **One word:** "One word. If someone finishes using this product and walks away, what's the one word you want them to feel?"
+
+**Start by extracting.** Before asking anything, read the user's opening message (and any earlier
+conversation) for answers. Most requests already contain two or three — "a calm, premium wellness
+app for busy women in their 30s" answers Audience and Product and hints at One word.
+
+If you inferred anything, confirm it in one short line before your first question, so the user can
+correct you:
+
+> "Got it — a wellness app for career-focused women in their 30s that should feel calm and premium.
+> A few more questions."
+
+**Then ask only what's missing, one question per message.** Wait for a response before asking the
+next. Never re-ask something already answered.
+
+**Quick mode.** If three or more answers are missing, first offer:
+
+> "I have a few questions. Want to take them one at a time, or see them all at once and answer in one go?"
+
+If they choose all at once, send the missing questions as one short numbered list and accept answers
+in any format. If they don't choose, go one at a time.
 
 If the user mentions a reference (a brand, app, or product they admire), use it as an anchor.
 Deconstruct what makes it work visually and emotionally, then build a new direction inspired by
 it — not a copy of it.
 
-Once you have answers to all 5 questions (some may come naturally in earlier answers — adapt),
-produce the Mood Brief using this exact format:
+Once you have all five answers (a "no references" answer counts), produce the Mood Brief using this
+exact format:
 
 ---
 
