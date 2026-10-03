@@ -1,5 +1,8 @@
 // Runs isolated headless Claude Code turns for the eval suite
 
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const { spawn } = require("child_process");
 const { parseStream, parseJudge, usageLimitHit } = require("./lib");
 
@@ -44,7 +47,7 @@ async function ask(cwd, prompt, sessionId) {
 }
 
 // Grade material against a rubric with a separate, tool-less claude call
-async function judge(cwd, rubric, material) {
+async function judge(_cwd, rubric, material) {
   const prompt = `You are a strict grader for an automated test. Grade the material below against the rubric.
 
 RUBRIC:
@@ -56,7 +59,11 @@ ${material}
 >>>
 
 Reply with ONLY a JSON object, no other text: {"pass": true or false, "reason": "<one short sentence>"}`;
-  const res = await runClaude(["-p", "--output-format", "stream-json", "--verbose", ...ISOLATION, "--", prompt], cwd);
+  // Grade from an empty folder: in the sandbox the installed skill (and any saved direction) can
+  // pull the judge into acting as the skill instead of grading
+  const blank = fs.mkdtempSync(path.join(os.tmpdir(), "dds-judge-"));
+  const res = await runClaude(["-p", "--output-format", "stream-json", "--verbose", ...ISOLATION, "--", prompt], blank);
+  fs.rmSync(blank, { recursive: true, force: true });
   return parseJudge(parseStream(res.stdout).text);
 }
 
