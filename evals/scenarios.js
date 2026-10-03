@@ -22,8 +22,11 @@ Typography: thin, airy rounded sans for everything.
 Manifesto: Hush is the softest room in your phone. Nothing sharp, nothing loud, nothing that asks for attention.
 One word: drift.`;
 
+// An actual mood brief (its heading or Tone Words section), not a mention like "before I write the mood brief"
+const hasMoodBrief = (text) => /^#{1,4}\s*Mood Brief|\*\*Tone Words\*\*|^#{1,4}\s*Tone Words/im.test(text);
+
 // Shared code checks
-const noMoodBriefYet = { name: "no mood brief yet", code: (c) => !/Mood Brief/i.test(c.text) || "produced a Mood Brief before intake finished" };
+const noMoodBriefYet = { name: "no mood brief yet", code: (c) => !hasMoodBrief(c.text) || "produced a Mood Brief before intake finished" };
 const noSpecYet = { name: "no spec or tokens yet", code: (c) => (!/\| Role \| Light/.test(c.text) && !c.out()) || "produced the spec/tokens before mood brief approval" };
 
 const tokensValid = {
@@ -95,7 +98,7 @@ module.exports = [
         prompt:
           "Give me a design direction. Here's everything at once: 1) Audience: retired gardeners in their 60s and 70s, hands-on, a bit skeptical of apps. 2) Product: a plant-care journal that reminds you when to water and lets you log photos of your garden over the seasons. 3) Absolutely avoid: anything techy, neon, or 'gamified'. 4) References: Gardenista, old seed-packet illustrations, Muji. 5) One word: rooted.",
         checks: [
-          { name: "produces a mood brief", code: (c) => /Mood Brief/i.test(c.text) || "no Mood Brief in response" },
+          { name: "produces a mood brief", code: (c) => hasMoodBrief(c.text) || "no Mood Brief in response" },
           noSpecYet,
           {
             name: "asks for approval before the spec",
@@ -188,3 +191,5 @@ module.exports = [
     ],
   },
 ];
+
+module.exports.hasMoodBrief = hasMoodBrief;

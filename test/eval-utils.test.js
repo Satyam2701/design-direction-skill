@@ -41,6 +41,14 @@ const tests = {
     assert.match(r.reason, /no verdict/);
   },
 
+  "hasMoodBrief: detects a real brief, ignores mentions"() {
+    const { hasMoodBrief } = require("../evals/scenarios");
+    assert.strictEqual(hasMoodBrief("One more question before I write the mood brief."), false);
+    assert.strictEqual(hasMoodBrief("### Mood Brief: Pennywise\n\n**Tone Words**\ncalm"), true);
+    assert.strictEqual(hasMoodBrief("**Tone Words**\ncalm · capable"), true);
+    assert.strictEqual(hasMoodBrief("## Mood Brief — Pennywise"), true);
+  },
+
   "outputDir: finds design-direction-*/tokens.json"() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dds-eval-"));
     assert.strictEqual(outputDir(dir), null);
