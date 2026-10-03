@@ -11,18 +11,26 @@ A Claude Code skill for standalone designers. Takes a vague product idea and tur
 
 Most designers know the feeling: you have a product to design but the brief is fuzzy. "Make it feel modern and clean" is not a direction. This skill fixes that.
 
-You describe your idea in plain language. Claude picks up what you've already said, asks only what's missing (one at a time, or all at once if you prefer), then walks you through three phases:
+You describe your idea in plain language. Claude picks up what you've already said, asks only what's missing (one at a time, or all at once if you prefer), then walks you through three phases — and builds a **visual direction board** as you go.
 
 **Phase 1 — Mood Brief**
-Tone words, color story, typography personality, visual do's and don'ts, and a design manifesto. Something you can pin above your desk.
+Tone words, 2–3 color story directions with real swatches, a live type pairing, visual do's and don'ts, and a design manifesto. Something you can pin above your desk.
 
 **Phase 2 — Concrete Spec**
 A full palette in light and dark mode — including semantic success, warning, error, and info colors — with every text pairing checked against WCAG AA contrast. Plus type scale, spacing system, and component style rules.
 
-Phase 2 also generates a **visual style tile** — one HTML page showing your palette, type specimen, spacing, and real components (buttons, inputs, cards, alerts) in your product's own voice, with a light/dark toggle — plus **developer-ready tokens**: CSS variables, a Tailwind v4 theme, and a W3C design-tokens JSON that Figma token plugins can import. Everything is generated from one `tokens.json`, so what you approve is exactly what developers get.
+Phase 2 also produces **developer-ready tokens**: CSS variables, a Tailwind v4 theme, and a W3C design-tokens JSON that Figma token plugins can import. Everything is generated from one `tokens.json`, so what you approve is exactly what developers get.
 
 **Phase 3 — Feature Thinking**
-User flows, feature ideas, and micro-interaction concepts — all tied to your specific direction and audience.
+User flows, feature ideas (each sized Quick win / Medium / Big bet), and micro-interaction concepts — all tied to your specific direction and audience.
+
+### The direction board
+
+One HTML page that grows with every phase — **Mood → Spec → Features** — with a progress header (approved · in review · needs review), a light/dark toggle, and section links. Before the spec exists it's a calm neutral page; once you have tokens, the board itself wears your palette and fonts. The Spec section shows every color role with contrast badges, a type specimen, spacing, radius, and real components (buttons, inputs, cards, alerts) written in your product's voice. Chat stays a short summary; the board carries the detail.
+
+### Pick up where you left off
+
+The whole direction is saved in your project. Come back in a new session — "let's keep going on Stillwater" — and Claude resumes at the next phase. Revise anything ("make the primary more vibrant") and later phases are flagged *needs review* on the board, with every change in a revision log.
 
 ---
 
@@ -79,7 +87,11 @@ Help me nail the vibe for a recipe app targeting busy parents
 I want something that feels premium but approachable — not sure where to start
 ```
 
-Claude will take it from there.
+Claude will take it from there. To return to a saved direction:
+
+```
+Let's keep going on my design direction
+```
 
 ---
 
@@ -126,21 +138,22 @@ Everything lands in one folder in your project:
 
 ```
 design-direction-wellness-app/
-├── style-tile.html      ← open in a browser; light/dark toggle
-├── tokens.json          ← source of truth (W3C design tokens; Figma token plugins can import it)
-├── tokens.css           ← CSS custom properties, light + dark
-├── tailwind.css         ← Tailwind v4 @theme
-└── design-direction-wellness-app-2026-10-03.md   ← the full direction, saved at the end
+├── board.html                         ← the direction board; open in a browser
+├── direction.json                     ← brief, mood, features, progress (what a later session resumes from)
+├── tokens.json                        ← design tokens (W3C format; Figma token plugins can import it)
+├── tokens.css                         ← CSS custom properties, light + dark
+├── tailwind.css                       ← Tailwind v4 @theme
+└── design-direction-wellness-app.md   ← the full direction as one shareable document
 ```
 
-Revisions regenerate the files, so the tile always matches the spec. Drop the markdown into Figma notes, Notion, or Linear, and hand the token files straight to a developer.
+Every file except the two JSON files is regenerated after each change, so the board, the document, and the token exports always agree. Drop the markdown into Figma notes, Notion, or Linear, and hand the token files straight to a developer.
 
 ---
 
 ## Requirements
 
 - Claude Code (CLI, desktop, or IDE extension)
-- Node.js 16+ for the style tile and token files (if `npx` works, you have it). Without Node, the skill still runs and produces the spec as text.
+- Node.js 16+ for the board and token files (if `npx` works, you have it). Without Node, the skill still runs and produces the spec as text.
 - No API keys, no dependencies
 
 ---
@@ -148,13 +161,13 @@ Revisions regenerate the files, so the tile always matches the spec. Drop the ma
 ## Testing
 
 ```bash
-npm test                      # installer, generator, and eval-helper unit tests (fast, no network)
+npm test                      # installer, generator, board, and eval-helper unit tests (fast, no network)
 npm run eval                  # behavioral evals: real Claude Code sessions against scenarios
 npm run eval -- --runs 3      # each scenario 3×; passes if 2 of 3 runs pass (use before releases)
 npm run eval -- --only full-flow
 ```
 
-`npm run eval` drives headless Claude Code (`claude -p`) through five scenarios — smart intake, quick mode, the Phase 1 approval gate, a low-contrast "pastel" brief, and a four-turn flow from spec to saved document — and grades each turn with code checks (valid tokens, passing contrast, files written) plus an LLM rubric for judgment calls like brand voice. Each run uses a throwaway project with only this skill installed; your own skills, plugins, hooks, and MCP servers are excluded. It uses your logged-in Claude Code, so it counts toward your plan's usage (a single pass takes a few minutes). Failed runs print the path to a full transcript.
+`npm run eval` drives headless Claude Code (`claude -p`) through seven scenarios — smart intake, quick mode, the Phase 1 approval gate, a low-contrast "pastel" brief, resuming a saved direction (both "I'm back" and "keep going"), and a four-turn flow from spec to finished board — and grades each turn with code checks (valid tokens, passing contrast, files written) plus an LLM rubric for judgment calls like brand voice. Each run uses a throwaway project with only this skill installed; your own skills, plugins, hooks, and MCP servers are excluded. It uses your logged-in Claude Code, so it counts toward your plan's usage (a single pass takes a few minutes). Failed runs print the path to a full transcript.
 
 ---
 

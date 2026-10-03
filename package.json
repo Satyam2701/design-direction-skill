@@ -1,6 +1,6 @@
 {
   "name": "design-direction-skill",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "A Claude Code skill that takes a vague design idea and turns it into a mood brief, concrete spec, and feature thinking session.",
   "keywords": [
     "claude",
