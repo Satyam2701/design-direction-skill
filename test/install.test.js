@@ -118,7 +118,7 @@ const tests = {
   "description is at most 400 characters and covers key triggers"() {
     const { description } = parseFrontmatter(SKILL);
     assert.ok(description.length <= 400, `description is ${description.length} chars`);
-    for (const phrase of ["style guide", "moodboard", "brand direction", "color palette"]) {
+    for (const phrase of ["style guide", "moodboard", "brand direction", "color palette", "style tile"]) {
       assert.ok(description.includes(phrase), `description missing "${phrase}"`);
     }
   },
@@ -139,8 +139,30 @@ const tests = {
   },
 
   "Phase 2 generates tokens and the style tile via build.js"() {
-    for (const marker of ["scripts/build.js", "tokens.json", "style-tile.html", "tokens.css", "tailwind.css", "If Node isn't available", "design-direction-<slug>/"]) {
+    for (const marker of ["scripts/build.js", "tokens.json", "style-tile.html", "tokens.css", "tailwind.css", "design-direction-<slug>/"]) {
       assert.ok(SKILL.includes(marker), `SKILL.md missing "${marker}"`);
+    }
+  },
+
+  "reference files exist and SKILL.md tells Claude when to read them"() {
+    const refs = {
+      "references/tokens-format.md": ['"$extensions"', "on-primary", "meta.copy", "If Node isn't available"],
+      "references/feature-thinking.md": ["#### User Flows", "#### Feature Ideas", "- Effort:", "#### Interaction & UX Concepts"],
+    };
+    for (const [rel, markers] of Object.entries(refs)) {
+      const file = path.join(__dirname, "..", "skills", "design-direction", rel);
+      assert.ok(fs.existsSync(file), `${rel} missing`);
+      const text = fs.readFileSync(file, "utf8");
+      for (const m of markers) assert.ok(text.includes(m), `${rel} missing "${m}"`);
+      assert.ok(SKILL.includes(rel), `SKILL.md never points to ${rel}`);
+    }
+  },
+
+  "installs reference files"() {
+    const box = sandbox();
+    run(box);
+    for (const rel of ["references/tokens-format.md", "references/feature-thinking.md"]) {
+      assert.ok(fs.existsSync(path.join(box.project, ".claude", "skills", "design-direction", rel)), `${rel} not installed`);
     }
   },
 };

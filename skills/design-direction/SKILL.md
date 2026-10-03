@@ -1,9 +1,9 @@
 ---
 name: design-direction
 description: >
-  Turns a vague product idea into a complete design direction: mood brief, concrete spec
-  (palette with dark mode and contrast checks, type scale, spacing, components), and feature
-  thinking. Use when a designer asks for a design direction, style guide, moodboard, brand
+  Turns a vague product idea into a design direction: mood brief, concrete spec
+  (contrast-checked light/dark palette, type, spacing) with a visual style tile and design
+  tokens, and feature thinking. Use when a designer asks for a design direction, style guide, moodboard, brand
   direction, or color palette, or says "I'm designing a [product] that should feel..." or
   "help me nail the vibe for...".
 ---
@@ -115,43 +115,10 @@ The spec is built from one source of truth, `tokens.json`. A generator script in
 into a visual style tile and developer-ready exports, so what the designer sees is exactly what the
 developer gets.
 
-1. **Write `design-direction-<slug>/tokens.json`** in the current working directory, where `<slug>`
-   is the product name in kebab-case (e.g. `design-direction-stillwater/`). Use this shape:
-
-   ```json
-   {
-     "meta": { "name": "Stillwater", "toneWords": ["quiet confidence", "earned slowness"],
-               "manifesto": "[the approved manifesto]", "accentAsText": false },
-     "color": {
-       "primary": { "$type": "color", "$value": "#55705A", "$description": "Main actions, focus rings",
-                    "$extensions": { "design-direction": { "dark": "#9DB59F" } } }
-     },
-     "font": {
-       "heading": { "$type": "fontFamily", "$value": ["Fraunces", "Georgia", "serif"] },
-       "body":    { "$type": "fontFamily", "$value": ["Inter", "system-ui", "sans-serif"] }
-     },
-     "typography": {
-       "h1": { "$type": "typography", "$value": { "fontFamily": "{font.heading}", "fontSize": "48px",
-               "fontWeight": 300, "lineHeight": 1.15, "letterSpacing": "-0.01em" } }
-     },
-     "spacing": { "1": { "$type": "dimension", "$value": "4px" } },
-     "radius":  { "sm": { "$type": "dimension", "$value": "8px" } },
-     "shadow":  { "card": { "$type": "shadow", "$value": "0 2px 8px rgba(0,0,0,0.06)" } }
-   }
-   ```
-
-   - `color` needs all 14 roles from the palette table below, as kebab-case keys (`primary`,
-     `on-primary`, `secondary`, `accent`, `background`, `surface`, `neutral-100`, `neutral-300`,
-     `neutral-600`, `neutral-900`, `success`, `warning`, `error`, `info`). Each needs a light
-     `$value` and a dark value, both `#RRGGBB`. `$description` is optional; it becomes the Usage column.
-   - `typography` needs `h1`, `h2`, `h3`, `body`, `caption` and `label`. Use fonts available on
-     Google Fonts, and always end each font stack with a generic fallback.
-   - List radius tokens smallest first. The first is used for buttons and inputs, the second for cards.
-   - Set `meta.accentAsText` to `true` if Accent is ever used for text.
-   - Add `meta.copy` so the tile speaks in the product's voice, not placeholder text. Keys (all
-     optional): `h1`, `h2`, `h3`, `body`, `caption`, `label`, `primaryAction`, `secondaryAction`,
-     `tertiaryAction`, `tag`, `success`, `warning`, `error`, `info`. Write them as real UI copy for this
-     product, e.g. `"primaryAction": "Send invoice"`, `"success": "Paid and reconciled."`.
+1. **Read `<skill-base-dir>/references/tokens-format.md`**, then **write
+   `design-direction-<slug>/tokens.json`** in the current working directory, where `<slug>` is the
+   product name in kebab-case (e.g. `design-direction-stillwater/`). The reference has the exact
+   shape, every required key, and how to write `meta.copy` in the product's voice.
 
 2. **Run the generator.** This skill's directory is the base directory shown when the skill loads:
 
@@ -172,9 +139,7 @@ developer gets.
 4. **Open the style tile:** `open design-direction-<slug>/style-tile.html` on macOS, `xdg-open` on
    Linux. If you can't open it, give the user the path. Tell them it has a light/dark toggle.
 
-**If Node isn't available** (`node` is missing or the script can't run), skip the generator and
-produce the tables yourself following the contrast rules below, with ratios labeled "approximate".
-If you can write files, hand-write `tokens.css` and a simple `style-tile.html` into the same folder.
+**If Node isn't available**, follow the fallback in `references/tokens-format.md`.
 
 **Revisions:** edit `tokens.json` and re-run the generator. Never hand-edit the generated files.
 
@@ -275,45 +240,13 @@ Do not proceed to Phase 3 until the user says yes.
 ## Phase 3 — Feature Thinking
 
 Using the approved Mood Brief, Spec, and the product description, generate all three sections
-below as one cohesive output. Everything should feel like it belongs to the same product — tie
+(user flows, feature ideas, interaction concepts) as one cohesive output. Everything should feel like it belongs to the same product — tie
 back to the tone words and audience from Phase 1.
 
 ---
 
-### Feature Thinking: [Product Name]
-
-#### User Flows
-
-Present 2–3 key flows. For each:
-
-**[Flow Name]** *(e.g. Onboarding, Core Action, Discovery)*
-1. [Screen name] — [one-line purpose]
-2. [Screen name] — [one-line purpose]
-3. [Screen name] — [one-line purpose]
-*(continue as needed)*
-
----
-
-#### Feature Ideas
-
-Present 5 feature ideas. For each:
-
-**[Feature Name]**
-- What it does: [one sentence]
-- Why it fits: [how it connects to the mood, audience, or product goal]
-- Effort: [Quick win / Medium / Big bet]
-
----
-
-#### Interaction & UX Concepts
-
-Present 5–7 micro-interaction or UX concepts. For each:
-
-**[Concept Name]** *(e.g. "Scroll-triggered fade-in", "Haptic tap confirmation")*
-- Where it lives: [screen or component]
-- What it does: [one sentence description]
-- Why it fits the mood: [tie back to a tone word or manifesto idea]
-- Implementation note: [one-line hint for a developer or prototyper]
+Read `<skill-base-dir>/references/feature-thinking.md` and present Feature Thinking in exactly that
+format: 2–3 user flows, 5 feature ideas (each with an effort label), and 5–7 interaction concepts.
 
 ---
 
