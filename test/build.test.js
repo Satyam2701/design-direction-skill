@@ -71,7 +71,8 @@ const tests = {
     const tw = r.read("tailwind.css");
     assert.ok(tw.includes("@theme"), "tailwind @theme");
     assert.ok(tw.includes("--color-primary: #55705A"));
-    assert.ok(r.read("style-tile.html"), "style tile written");
+    assert.ok(r.read("board.html"), "board written");
+    assert.strictEqual(r.read("style-tile.html"), null, "style-tile.html is replaced by board.html");
   },
 
   "CLI: stdout has palette and contrast tables"() {
@@ -88,7 +89,7 @@ const tests = {
     assert.strictEqual(r.status, 2);
     assert.match(r.stderr, /color\.on-primary/);
     assert.strictEqual(r.read("tokens.css"), null);
-    assert.strictEqual(r.read("style-tile.html"), null);
+    assert.strictEqual(r.read("board.html"), null);
   },
 
   "CLI: failing contrast exits 1 and names the pair"() {
@@ -97,7 +98,7 @@ const tests = {
     const r = runBuild(t);
     assert.strictEqual(r.status, 1);
     assert.match(r.stderr, /FAIL Neutral 600 on Background light \d+\.\d+:1 \(needs 4\.5:1\)/);
-    assert.ok(r.read("style-tile.html"), "outputs still written");
+    assert.ok(r.read("board.html"), "outputs still written");
   },
 
   "CLI: accent pair only checked when accentAsText"() {
@@ -109,9 +110,9 @@ const tests = {
     assert.strictEqual(runBuild(t).status, 1);
   },
 
-  "style tile: contains every role, name, fonts and theme toggle"() {
+  "board spec: contains every role, name, fonts and theme toggle"() {
     const t = fixture();
-    const html = runBuild(t).read("style-tile.html");
+    const html = runBuild(t).read("board.html");
     for (const [role, tok] of Object.entries(t.color)) {
       assert.ok(html.includes(tok.$value), `light ${role}`);
       assert.ok(html.includes(tok.$extensions["design-direction"].dark), `dark ${role}`);
@@ -122,26 +123,26 @@ const tests = {
     assert.ok(html.includes('data-theme'), "theme toggle");
   },
 
-  "style tile: uses meta.copy in brand voice, escaped"() {
+  "board spec: uses meta.copy in brand voice, escaped"() {
     const t = fixture();
     t.meta.copy = { h1: "Money, handled", primaryAction: "Send invoice", success: "Paid & reconciled <today>" };
-    const html = runBuild(t).read("style-tile.html");
+    const html = runBuild(t).read("board.html");
     assert.ok(html.includes("Money, handled"));
     assert.ok(html.includes(">Send invoice<"));
     assert.ok(html.includes("Paid &amp; reconciled &lt;today&gt;"));
   },
 
-  "style tile: default copy is product-neutral"() {
-    const html = runBuild(fixture()).read("style-tile.html");
+  "board spec: default copy is product-neutral"() {
+    const html = runBuild(fixture()).read("board.html");
     for (const themed of ["quiet hour", "session", "journal", "ritual"]) {
       assert.ok(!html.toLowerCase().includes(themed), `default copy mentions "${themed}"`);
     }
   },
 
-  "style tile: escapes HTML in meta text"() {
+  "board spec: escapes HTML in meta text"() {
     const t = fixture();
     t.meta.name = "<script>alert(1)</script>";
-    const html = runBuild(t).read("style-tile.html");
+    const html = runBuild(t).read("board.html");
     assert.ok(!html.includes("<script>alert(1)"), "unescaped script tag");
     assert.ok(html.includes("&lt;script&gt;"));
   },
