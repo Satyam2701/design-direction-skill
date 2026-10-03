@@ -1,0 +1,58 @@
+{
+  "product": {
+    "name": "Stillwater",
+    "summary": "A meditation app with short, guided sessions that fit between meetings.",
+    "audience": "Career-focused women in their 30s who want to slow down but have little time.",
+    "oneWord": "restored",
+    "avoid": "Clinical wellness, hustle-culture urgency, gamified streak pressure."
+  },
+  "references": ["Aesop", "Kinfolk magazine", "Headspace's warmth without the cartoons"],
+  "mood": {
+    "toneWords": ["quiet confidence", "earned slowness", "warm minimalism"],
+    "palettes": [
+      {
+        "name": "Warm Stone",
+        "feeling": "Grounded and calm, like a sunlit stone floor — familiar enough to relax into, refined enough to feel earned.",
+        "direction": "Muted sage greens, warm off-whites, one terracotta accent; low saturation, warm temperature.",
+        "swatches": ["#55705A", "#F7F3EC", "#A9B8A3", "#A65A40", "#2E2B27"]
+      },
+      {
+        "name": "Dusk Linen",
+        "feeling": "The ten minutes after sunset — soft, quiet, a little luxurious.",
+        "direction": "Dusty mauve, linen, deep plum ink; medium saturation, cool-warm balance.",
+        "swatches": ["#8A6F7E", "#F4EFEA", "#C9B8B0", "#3A2E3A"]
+      },
+      {
+        "name": "Morning Fog",
+        "feeling": "Clear-headed and light — the calm of an early, empty morning.",
+        "direction": "Blue-greys, chalk white, a pale gold highlight; very low saturation, cool.",
+        "swatches": ["#6E8294", "#F5F6F4", "#C7CFD4", "#D9B86C"]
+      }
+    ],
+    "typography": {
+      "personality": "Light and airy headlines that whisper rather than shout, with a calm, highly readable body.",
+      "pairing": "A soft humanist serif for headlines + a clean geometric sans for body",
+      "heading": "Fraunces",
+      "body": "Inter"
+    },
+    "dos": [
+      "Let generous negative space do the calming",
+      "Use one warm accent moment per screen",
+      "Favor soft, slow transitions over snappy ones"
+    ],
+    "donts": [
+      "No streak counters or red notification badges",
+      "No clinical whites or blue-tinted 'health app' palettes",
+      "No dense lists — never more than one decision per screen"
+    ],
+    "manifesto": "Stillwater is the ten minutes she gives back to herself. Every surface is warm, every motion unhurried, every word chosen. Nothing competes for her attention, because her attention is the point."
+  },
+  "status": {
+    "phase": 2,
+    "approved": [1],
+    "needsReview": [],
+    "log": [
+      { "date": "2026-10-03", "note": "Mood brief approved (Warm Stone)" }
+    ]
+  }
+}
