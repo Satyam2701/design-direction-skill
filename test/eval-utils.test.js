@@ -29,6 +29,13 @@ const tests = {
     assert.strictEqual(r.isError, true);
   },
 
+  "usageLimitHit: detects Claude usage-limit replies"() {
+    const { usageLimitHit } = require("../evals/lib");
+    assert.strictEqual(usageLimitHit("You've hit your session limit · resets 3:10pm (Asia/Calcutta)"), true);
+    assert.strictEqual(usageLimitHit("Claude usage limit reached. Your limit will reset at 5pm."), true);
+    assert.strictEqual(usageLimitHit("### Mood Brief: Seedbook — no limits here"), false);
+  },
+
   "parseJudge: plain JSON, fenced JSON, prose around JSON"() {
     assert.deepStrictEqual(parseJudge('{"pass": true, "reason": "ok"}'), { pass: true, reason: "ok" });
     assert.deepStrictEqual(parseJudge('```json\n{"pass": false, "reason": "no"}\n```'), { pass: false, reason: "no" });

@@ -50,6 +50,11 @@ function parseJudge(text) {
   return { pass: false, reason: `judge returned no verdict: ${String(text).slice(0, 200)}` };
 }
 
+// True when Claude Code answered with a plan/session usage-limit notice instead of doing the turn
+function usageLimitHit(text) {
+  return /hit your (session|usage|weekly) limit|usage limit reached/i.test(String(text));
+}
+
 // Relative paths of all files under dir, skipping .claude/
 function listFiles(dir, base = dir) {
   if (!fs.existsSync(dir)) return [];
@@ -71,4 +76,4 @@ function outputDir(dir) {
   return outputDirs(dir)[0] || null;
 }
 
-module.exports = { passThreshold, parseStream, parseJudge, listFiles, outputDir, outputDirs };
+module.exports = { passThreshold, parseStream, parseJudge, usageLimitHit, listFiles, outputDir, outputDirs };

@@ -1,7 +1,7 @@
 // Runs isolated headless Claude Code turns for the eval suite
 
 const { spawn } = require("child_process");
-const { parseStream, parseJudge } = require("./lib");
+const { parseStream, parseJudge, usageLimitHit } = require("./lib");
 
 // User skills, plugins, hooks, and MCP servers stay out; only project .claude/skills load
 const ISOLATION = ["--setting-sources", "project", "--strict-mcp-config"];
@@ -36,6 +36,7 @@ async function ask(cwd, prompt, sessionId) {
   args.push("--", prompt);
   const res = await runClaude(args, cwd);
   const parsed = parseStream(res.stdout);
+  if (usageLimitHit(parsed.text)) throw new Error(`usage limit reached — not a skill failure; re-run later (${parsed.text.trim().slice(0, 80)})`);
   if (!parsed.sessionId || (!parsed.text && res.code !== 0)) {
     throw new Error(`claude exited ${res.code}: ${(res.stderr || res.stdout).trim().slice(-400)}`);
   }

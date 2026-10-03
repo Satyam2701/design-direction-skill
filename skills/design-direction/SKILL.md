@@ -39,8 +39,9 @@ the product name in kebab-case (e.g. `design-direction-stillwater/`):
 | `tokens.css`, `tailwind.css` | generator | developer exports |
 | `design-direction-<slug>.md` | generator | the whole direction as one shareable document |
 
-**Build after every change** to either JSON file. This skill's directory is the base directory shown
-when the skill loads:
+**Build after every change** to either JSON file — always as its own command, never chained with
+`open`, `cd` or anything else (a permission rule on one part would block the whole line). This
+skill's directory is the base directory shown when the skill loads:
 
 ```bash
 node <skill-base-dir>/scripts/build.js design-direction-<slug>/
@@ -51,8 +52,9 @@ node <skill-base-dir>/scripts/build.js design-direction-<slug>/
   its hue, and build again until it exits 0. Never present failing values.
 - **Exit 2:** a JSON file is invalid (listed as `ERROR ...` with the exact field). Fix it and build again.
 
-**Open the board** after each phase: `open design-direction-<slug>/board.html` on macOS, `xdg-open`
-on Linux; if you can't, give the user the path. The board grows phase by phase, shows progress in
+**Open the board** after each phase, as a separate step: `open design-direction-<slug>/board.html` on
+macOS, `xdg-open` on Linux. Opening is a nicety — if it isn't available or allowed, just give the
+user the path; never let it stop the build. The board grows phase by phase, shows progress in
 its header, and has a light/dark toggle — chat stays a short summary.
 
 **Keep `status` accurate** (see the Status table in `references/direction-format.md`): mark each
