@@ -12,8 +12,8 @@ const os = require("os");
 const path = require("path");
 const { execFileSync } = require("child_process");
 const { ask, judge } = require("./claude");
-const { passThreshold, outputDir } = require("./lib");
-const { validate, checkContrast } = require("../skills/design-direction/scripts/build");
+const { passThreshold, outputDir, outputDirs } = require("./lib");
+const { validate, validateDirection, checkContrast } = require("../skills/design-direction/scripts/build");
 const scenarios = require("./scenarios");
 
 const ROOT = path.join(__dirname, "..");
@@ -36,10 +36,10 @@ function sandbox(id, run) {
 
 function context(dir, text, transcript, state) {
   const out = () => outputDir(dir);
-  const tokens = () => {
+  const readJson = (file) => {
     const o = out();
     try {
-      return o ? JSON.parse(fs.readFileSync(path.join(o, "tokens.json"), "utf8")) : null;
+      return o ? JSON.parse(fs.readFileSync(path.join(o, file), "utf8")) : null;
     } catch {
       return null;
     }
@@ -51,8 +51,13 @@ function context(dir, text, transcript, state) {
     dir,
     state,
     out,
-    tokens,
+    outs: () => outputDirs(dir),
+    tokens: () => readJson("tokens.json"),
+    direction: () => readJson("direction.json"),
+    read: (file) => (inOut(file) && fs.existsSync(inOut(file)) ? fs.readFileSync(inOut(file), "utf8") : null),
+    files: () => (out() ? fs.readdirSync(out()) : []),
     validate,
+    validateDirection,
     checkContrast,
     fileExists: (file) => Boolean(inOut(file) && fs.existsSync(inOut(file))),
     mtime: (file) => (inOut(file) && fs.existsSync(inOut(file)) ? fs.statSync(inOut(file)).mtimeMs : 0),
@@ -61,6 +66,7 @@ function context(dir, text, transcript, state) {
 
 async function runScenario(scenario, run) {
   const dir = sandbox(scenario.id, run);
+  if (scenario.setup) scenario.setup(dir);
   const state = {};
   const failures = [];
   const transcript = [];

@@ -60,10 +60,15 @@ function listFiles(dir, base = dir) {
   });
 }
 
-// The design-direction-*/ output folder Claude created, or null
-function outputDir(dir) {
-  const hit = listFiles(dir).find((f) => /^design-direction-[^/]+\/tokens\.json$/.test(f));
-  return hit ? path.join(dir, path.dirname(hit)) : null;
+// Every design-direction-*/ folder holding a direction.json or tokens.json
+function outputDirs(dir) {
+  const hits = listFiles(dir).filter((f) => /^design-direction-[^/]+\/(direction|tokens)\.json$/.test(f));
+  return [...new Set(hits.map((f) => path.join(dir, path.dirname(f))))].sort();
 }
 
-module.exports = { passThreshold, parseStream, parseJudge, listFiles, outputDir };
+// The design-direction-*/ output folder Claude created, or null
+function outputDir(dir) {
+  return outputDirs(dir)[0] || null;
+}
+
+module.exports = { passThreshold, parseStream, parseJudge, listFiles, outputDir, outputDirs };

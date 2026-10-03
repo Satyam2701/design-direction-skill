@@ -27,7 +27,7 @@ const hasMoodBrief = (text) => /^#{1,4}\s*Mood Brief|\*\*Tone Words\*\*|^#{1,4}\
 
 // Shared code checks
 const noMoodBriefYet = { name: "no mood brief yet", code: (c) => !hasMoodBrief(c.text) || "produced a Mood Brief before intake finished" };
-const noSpecYet = { name: "no spec or tokens yet", code: (c) => (!/\| Role \| Light/.test(c.text) && !c.out()) || "produced the spec/tokens before mood brief approval" };
+const noSpecYet = { name: "no spec or tokens yet", code: (c) => (!/\| Role \| Light/.test(c.text) && !c.tokens()) || "produced the spec/tokens before mood brief approval" };
 
 const tokensValid = {
   name: "tokens.json valid",
@@ -45,7 +45,32 @@ const contrastPasses = {
     return failing.length === 0 || `failing: ${failing.map((r) => `${r.label} ${r.mode} ${r.ratio}`).join(", ")}`;
   },
 };
-const tileWritten = { name: "style tile written", code: (c) => c.fileExists("style-tile.html") || "no style-tile.html next to tokens.json" };
+const boardWritten = { name: "board written", code: (c) => c.fileExists("board.html") || "no board.html in the direction folder" };
+const directionValid = {
+  name: "direction.json valid",
+  code: (c) => {
+    if (!c.direction()) return "no design-direction-*/direction.json written";
+    const errors = c.validateDirection(c.direction());
+    return errors.length === 0 || `invalid direction: ${errors.slice(0, 3).join("; ")}`;
+  },
+};
+const phaseApproved = (n) => ({
+  name: `phase ${n} recorded as approved`,
+  code: (c) => ((c.direction() && (c.direction().status.approved || []).includes(n)) || `status.approved lacks ${n}: ${JSON.stringify(c.direction() && c.direction().status)}`),
+});
+
+// Seed a saved Stillwater direction: mood and spec approved, features not started
+function seedStillwater(dir) {
+  const fs = require("fs");
+  const path = require("path");
+  const fixtures = path.join(__dirname, "..", "test", "fixtures");
+  const out = path.join(dir, "design-direction-stillwater");
+  fs.mkdirSync(out);
+  const direction = JSON.parse(fs.readFileSync(path.join(fixtures, "direction.json"), "utf8"));
+  direction.status = { phase: 3, approved: [1, 2], needsReview: [], log: [{ date: "2026-10-01", note: "Mood approved" }, { date: "2026-10-02", note: "Spec approved" }] };
+  fs.writeFileSync(path.join(out, "direction.json"), JSON.stringify(direction, null, 2));
+  fs.copyFileSync(path.join(fixtures, "tokens.json"), path.join(out, "tokens.json"));
+}
 
 module.exports = [
   {
@@ -100,11 +125,14 @@ module.exports = [
         checks: [
           { name: "produces a mood brief", code: (c) => hasMoodBrief(c.text) || "no Mood Brief in response" },
           noSpecYet,
+          directionValid,
+          boardWritten,
+          { name: "phase 1 not yet approved", code: (c) => (c.direction() && !(c.direction().status.approved || []).includes(1)) || "mood marked approved before the user approved it" },
           {
             name: "asks for approval before the spec",
             judge: (c) => ({
               rubric:
-                "PASS only if the response presents a mood brief (tone words, color story, typography, do's/don'ts, manifesto) and then asks the user whether it feels right / for approval before moving on. It must NOT include hex codes, a type scale table, or a concrete spec.",
+                "PASS only if the response presents a mood brief summary (tone words, color story / palette directions, typography, and a manifesto; it may point to a board file for full detail) and then asks the user whether it feels right / for approval before moving on. It must NOT include a palette table with hex codes per role, a type scale table, or a concrete spec.",
               material: c.text,
             }),
           },
@@ -118,7 +146,29 @@ module.exports = [
     turns: [
       {
         prompt: approved(HUSH),
-        checks: [tokensValid, contrastPasses, tileWritten],
+        checks: [tokensValid, contrastPasses, boardWritten],
+      },
+    ],
+  },
+
+  {
+    id: "resume",
+    setup: seedStillwater,
+    turns: [
+      {
+        prompt: "Let's keep going on my design direction.",
+        checks: [
+          noMoodBriefYet,
+          { name: "no new direction folder", code: (c) => c.outs().length === 1 || `expected 1 direction folder, found ${c.outs().length}` },
+          {
+            name: "offers to continue from features",
+            judge: (c) => ({
+              rubric:
+                "A saved design direction for 'Stillwater' exists with the mood and the spec already approved and feature thinking not started. PASS only if the assistant (1) recognizes it is Stillwater, (2) conveys that mood and spec are done and features/feature thinking come next, (3) offers to continue (offering to revise or start fresh as well is fine), and (4) does NOT restart the intake (no questions about audience, product, references, or the one word) and does NOT produce a new mood brief or spec.",
+              material: c.text,
+            }),
+          },
+        ],
       },
     ],
   },
@@ -131,7 +181,9 @@ module.exports = [
         checks: [
           tokensValid,
           contrastPasses,
-          tileWritten,
+          boardWritten,
+          directionValid,
+          phaseApproved(1),
           {
             name: "chat hexes match tokens.json",
             code: (c) => {
@@ -142,18 +194,18 @@ module.exports = [
             },
           },
           {
-            name: "tile copy is in the product's voice",
+            name: "board copy is in the product's voice",
             judge: (c) => ({
               rubric:
-                "This is sample UI copy for the style tile of Ledgerly, a bookkeeping app for freelance creatives (tone: calm competence, friendly precision, unfussy). PASS only if the copy exists, is specific to bookkeeping/invoicing/freelancing (not generic placeholder text), and matches that calm, friendly tone.",
+                "This is sample UI copy for the design board components of Ledgerly, a bookkeeping app for freelance creatives (tone: calm competence, friendly precision, unfussy). PASS only if the copy exists, is specific to bookkeeping/invoicing/freelancing (not generic placeholder text), and matches that calm, friendly tone.",
               material: JSON.stringify((c.tokens() && c.tokens().meta && c.tokens().meta.copy) || null, null, 2),
             }),
           },
           {
-            name: "remember primary and tile time",
+            name: "remember primary and board time",
             code: (c) => {
               c.state.primary = c.tokens() && c.tokens().color.primary.$value;
-              c.state.tileTime = c.mtime("style-tile.html");
+              c.state.boardTime = c.mtime("board.html");
               return true;
             },
           },
@@ -165,25 +217,31 @@ module.exports = [
           { name: "primary changed", code: (c) => (c.tokens() && c.tokens().color.primary.$value !== c.state.primary) || `primary still ${c.state.primary}` },
           tokensValid,
           contrastPasses,
-          { name: "tile regenerated", code: (c) => c.mtime("style-tile.html") > c.state.tileTime || "style-tile.html not regenerated" },
+          { name: "board regenerated", code: (c) => c.mtime("board.html") > c.state.boardTime || "board.html not regenerated" },
+          { name: "revision logged", code: (c) => ((c.direction() && (c.direction().status.log || []).length >= 1) || "no status.log entry for the revision") },
         ],
       },
       {
         prompt: "Approved — that's the spec.",
         checks: [
-          { name: "feature thinking heading", code: (c) => /Feature Thinking/i.test(c.text) || "no Feature Thinking section" },
-          { name: "5+ feature ideas with effort", code: (c) => (c.text.match(/Effort:?\**\s*:?/gi) || []).length >= 5 || "fewer than 5 'Effort:' lines" },
+          { name: "feature thinking in chat", code: (c) => /Feature Thinking/i.test(c.text) || "no Feature Thinking summary in chat" },
+          directionValid,
+          { name: "features saved with 5+ ideas", code: (c) => ((c.direction() && c.direction().features && c.direction().features.ideas.length >= 5) || "direction.json has no features with 5+ ideas") },
+          phaseApproved(2),
+          { name: "board shows features", code: (c) => ((c.read("board.html") || "").includes('id="features"') && !(c.read("board.html") || "").includes("Comes after Phase 2")) || "board has no Features section" },
         ],
       },
       {
         prompt: "Approved. Yes, please save it.",
         checks: [
+          phaseApproved(3),
           {
-            name: "markdown saved in the folder",
+            name: "markdown document has every phase",
             code: (c) => {
-              const out = c.out();
-              if (!out) return "no output folder";
-              return require("fs").readdirSync(out).some((f) => f.endsWith(".md")) || "no .md file inside design-direction-*/";
+              const md = c.files().find((f) => f.endsWith(".md"));
+              if (!md) return "no .md file inside design-direction-*/";
+              const text = c.read(md);
+              return ["## Mood Brief", "## Design Spec", "## Feature Thinking"].every((h) => text.includes(h)) || "markdown is missing a phase section";
             },
           },
         ],

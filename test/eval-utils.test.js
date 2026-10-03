@@ -2,7 +2,7 @@ const assert = require("assert");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { passThreshold, parseStream, parseJudge, outputDir } = require("../evals/lib");
+const { passThreshold, parseStream, parseJudge, outputDir, outputDirs } = require("../evals/lib");
 
 const tests = {
   "passThreshold: 1 of 1, 2 of 3, 4 of 5"() {
@@ -49,12 +49,25 @@ const tests = {
     assert.strictEqual(hasMoodBrief("## Mood Brief — Pennywise"), true);
   },
 
-  "outputDir: finds design-direction-*/tokens.json"() {
+  "outputDir: finds design-direction-*/ by tokens.json or direction.json"() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dds-eval-"));
     assert.strictEqual(outputDir(dir), null);
     fs.mkdirSync(path.join(dir, "design-direction-hush"));
-    fs.writeFileSync(path.join(dir, "design-direction-hush", "tokens.json"), "{}");
+    fs.writeFileSync(path.join(dir, "design-direction-hush", "direction.json"), "{}");
     assert.strictEqual(outputDir(dir), path.join(dir, "design-direction-hush"));
+    const other = fs.mkdtempSync(path.join(os.tmpdir(), "dds-eval-"));
+    fs.mkdirSync(path.join(other, "design-direction-ledgerly"));
+    fs.writeFileSync(path.join(other, "design-direction-ledgerly", "tokens.json"), "{}");
+    assert.strictEqual(outputDir(other), path.join(other, "design-direction-ledgerly"));
+  },
+
+  "outputDirs: lists every direction folder"() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dds-eval-"));
+    for (const slug of ["a", "b"]) {
+      fs.mkdirSync(path.join(dir, `design-direction-${slug}`));
+      fs.writeFileSync(path.join(dir, `design-direction-${slug}`, "direction.json"), "{}");
+    }
+    assert.strictEqual(outputDirs(dir).length, 2);
   },
 };
 
