@@ -95,7 +95,7 @@ function validate(t) {
   if (!t || typeof t !== "object") return ["tokens: expected a JSON object"];
 
   if (!t.meta || typeof t.meta.name !== "string" || !t.meta.name.trim()) {
-    errors.push("meta.name: required (product name shown on the style tile)");
+    errors.push("meta.name: required (or provide direction.json, which supplies it)");
   }
 
   const colors = t.color || {};

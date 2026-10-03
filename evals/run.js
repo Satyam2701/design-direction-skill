@@ -13,7 +13,7 @@ const path = require("path");
 const { execFileSync } = require("child_process");
 const { ask, judge } = require("./claude");
 const { passThreshold, outputDir, outputDirs } = require("./lib");
-const { validate, validateDirection, checkContrast } = require("../skills/design-direction/scripts/build");
+const { validate, validateDirection, resolveTokens, checkContrast } = require("../skills/design-direction/scripts/build");
 const scenarios = require("./scenarios");
 
 const ROOT = path.join(__dirname, "..");
@@ -52,7 +52,8 @@ function context(dir, text, transcript, state) {
     state,
     out,
     outs: () => outputDirs(dir),
-    tokens: () => readJson("tokens.json"),
+    // Resolved the same way the generator does, so meta can come from direction.json
+    tokens: () => resolveTokens(readJson("tokens.json"), readJson("direction.json")),
     direction: () => readJson("direction.json"),
     read: (file) => (inOut(file) && fs.existsSync(inOut(file)) ? fs.readFileSync(inOut(file), "utf8") : null),
     files: () => (out() ? fs.readdirSync(out()) : []),

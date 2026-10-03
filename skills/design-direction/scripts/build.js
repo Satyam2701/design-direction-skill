@@ -40,25 +40,31 @@ function resolveInputs(input) {
   };
 }
 
+// tokens.meta can lean on direction.json for the shared basics; explicit values win
+function resolveTokens(tokens, direction) {
+  if (!tokens || !direction || !direction.product || !direction.mood) return tokens;
+  return {
+    ...tokens,
+    meta: {
+      name: direction.product.name,
+      toneWords: direction.mood.toneWords,
+      manifesto: direction.mood.manifesto,
+      ...(tokens.meta || {}),
+    },
+  };
+}
+
 function build(input) {
   const { dir, directionPath, tokensPath } = resolveInputs(input);
   const errors = [];
   if (!directionPath && !tokensPath) return { errors: [`no direction.json or tokens.json found in ${dir}`] };
 
   const direction = directionPath ? readJson(directionPath, errors) : null;
-  const tokens = tokensPath ? readJson(tokensPath, errors) : null;
+  const rawTokens = tokensPath ? readJson(tokensPath, errors) : null;
   if (errors.length) return { errors };
 
   if (direction) errors.push(...validateDirection(direction));
-  if (tokens && direction && direction.product && direction.mood) {
-    // tokens.meta can lean on direction.json for the shared basics
-    tokens.meta = {
-      name: direction.product.name,
-      toneWords: direction.mood.toneWords,
-      manifesto: direction.mood.manifesto,
-      ...(tokens.meta || {}),
-    };
-  }
+  const tokens = resolveTokens(rawTokens, direction);
   if (tokens) errors.push(...validate(tokens));
   if (errors.length) return { errors };
 
@@ -110,6 +116,6 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { contrastRatio, validate, validateDirection, checkContrast, renderCss, renderTailwind, build, ROLES, PAIRS };
+module.exports = { contrastRatio, validate, validateDirection, resolveTokens, checkContrast, renderCss, renderTailwind, build, ROLES, PAIRS };
 
 if (require.main === module) process.exit(main(process.argv.slice(2)));

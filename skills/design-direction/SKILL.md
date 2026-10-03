@@ -72,11 +72,15 @@ Look for an existing `design-direction-*/direction.json` in the current working 
 - **None found:** start Phase 1.
 - **Found, and the user is clearly starting a different product:** start Phase 1 for the new one in
   its own folder.
-- **Found otherwise:** read it (and `tokens.json` if present) and offer to pick up where they left
-  off, in one short message — e.g.
+- **Found otherwise:** read it (and `tokens.json` if present).
+  - **If the user already said what they want** ("keep going", "continue", "change the primary to
+    teal"), do it — open with a one-line recap of where things stand ("Stillwater: mood and spec
+    approved — on to feature thinking.") and follow the matching option below.
+  - **If it's unclear** (e.g. "I'm back", "about my app"), offer to pick up where they left off in one
+    short message and wait for their answer:
 
-  > "I found your **Stillwater** direction — mood approved, spec in review, features not started.
-  > Want to **continue** from the spec, **revise** something, or **start fresh**?"
+    > "I found your **Stillwater** direction — mood approved, spec in review, features not started.
+    > Want to **continue** from the spec, **revise** something, or **start fresh**?"
 
   - **Continue:** resume at the first phase that isn't approved, following that phase's steps.
   - **Revise:** make the change in the right JSON file, update `status` and the log, build, and

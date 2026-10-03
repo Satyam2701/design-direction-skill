@@ -156,15 +156,50 @@ module.exports = [
     setup: seedStillwater,
     turns: [
       {
-        prompt: "Let's keep going on my design direction.",
+        prompt: "Hi, I'm back to work on Stillwater.",
         checks: [
           noMoodBriefYet,
           { name: "no new direction folder", code: (c) => c.outs().length === 1 || `expected 1 direction folder, found ${c.outs().length}` },
+          { name: "waits before writing features", code: (c) => !(c.direction() && c.direction().features) || "wrote features before the user chose to continue" },
           {
             name: "offers to continue from features",
             judge: (c) => ({
               rubric:
-                "A saved design direction for 'Stillwater' exists with the mood and the spec already approved and feature thinking not started. PASS only if the assistant (1) recognizes it is Stillwater, (2) conveys that mood and spec are done and features/feature thinking come next, (3) offers to continue (offering to revise or start fresh as well is fine), and (4) does NOT restart the intake (no questions about audience, product, references, or the one word) and does NOT produce a new mood brief or spec.",
+                "A saved design direction for 'Stillwater' exists with the mood and the spec already approved and feature thinking not started. The user only said they are back. PASS only if the assistant (1) recognizes it is Stillwater, (2) conveys that mood and spec are done and features/feature thinking come next, (3) offers to continue (offering to revise or start fresh as well is fine) and waits for an answer, and (4) does NOT restart the intake (no questions about audience, product, references, or the one word) and does NOT produce a new mood brief, spec, or feature thinking.",
+              material: c.text,
+            }),
+          },
+        ],
+      },
+      {
+        prompt: "Continue.",
+        checks: [
+          { name: "feature thinking in chat", code: (c) => /Feature Thinking/i.test(c.text) || "no Feature Thinking summary in chat" },
+          directionValid,
+          { name: "features saved with 5+ ideas", code: (c) => ((c.direction() && c.direction().features && c.direction().features.ideas.length >= 5) || "direction.json has no features with 5+ ideas") },
+          { name: "approvals preserved", code: (c) => (c.direction() && [1, 2].every((n) => c.direction().status.approved.includes(n))) || "lost the existing approvals" },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: "resume-direct",
+    setup: seedStillwater,
+    turns: [
+      {
+        prompt: "Let's keep going on my design direction.",
+        checks: [
+          noMoodBriefYet,
+          { name: "no new direction folder", code: (c) => c.outs().length === 1 || `expected 1 direction folder, found ${c.outs().length}` },
+          { name: "feature thinking in chat", code: (c) => /Feature Thinking/i.test(c.text) || "no Feature Thinking summary in chat" },
+          directionValid,
+          { name: "features saved with 5+ ideas", code: (c) => ((c.direction() && c.direction().features && c.direction().features.ideas.length >= 5) || "direction.json has no features with 5+ ideas") },
+          {
+            name: "continues without re-asking",
+            judge: (c) => ({
+              rubric:
+                "A saved 'Stillwater' direction has mood and spec approved. The user said 'Let's keep going'. PASS only if the assistant briefly recaps where things stand and proceeds to feature thinking for Stillwater, WITHOUT restarting the intake (no questions about audience, product, references, or the one word) and WITHOUT redoing the mood brief or spec.",
               material: c.text,
             }),
           },

@@ -112,6 +112,21 @@ const tests = {
     assert.ok(r.read("tokens.css").includes("Stillwater"), "name filled in");
   },
 
+  "resolveTokens: fills meta from direction without overriding explicit values"() {
+    const { resolveTokens, validate } = require(BUILD);
+    const t = tokens();
+    delete t.meta.name;
+    delete t.meta.toneWords;
+    t.meta.manifesto = "Explicit manifesto";
+    const r = resolveTokens(t, direction());
+    assert.strictEqual(r.meta.name, "Stillwater");
+    assert.deepStrictEqual(r.meta.toneWords, direction().mood.toneWords);
+    assert.strictEqual(r.meta.manifesto, "Explicit manifesto");
+    assert.deepStrictEqual(validate(r), []);
+    assert.strictEqual(t.meta.name, undefined, "input not mutated");
+    assert.strictEqual(resolveTokens(t, null), t, "no direction: unchanged");
+  },
+
   "invalid direction exits 2 and writes nothing"() {
     const d = direction();
     delete d.mood.manifesto;
