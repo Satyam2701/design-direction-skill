@@ -2,10 +2,10 @@
 name: design-direction
 description: >
   Turns a vague product idea into a design direction: mood brief, concrete spec
-  (contrast-checked light/dark palette, type, spacing) with a visual style tile and design
-  tokens, and feature thinking. Use when a designer asks for a design direction, style guide, moodboard, brand
-  direction, or color palette, or says "I'm designing a [product] that should feel..." or
-  "help me nail the vibe for...".
+  (contrast-checked light/dark palette, type, spacing) with a direction board and design
+  tokens, and feature thinking. Use when a designer asks for a design direction, style guide,
+  moodboard, brand direction, or color palette, or says "I'm designing a [product] that should
+  feel..." or "help me nail the vibe for...".
 ---
 
 # Design Direction
@@ -23,6 +23,68 @@ You MUST complete Phase 2 and get explicit user approval before starting Phase 3
 Never combine phases. Never output a spec before the mood brief is approved.
 Never output feature thinking before the spec is approved.
 </HARD-GATE>
+
+---
+
+## The direction folder
+
+Everything lives in `design-direction-<slug>/` in the current working directory, where `<slug>` is
+the product name in kebab-case (e.g. `design-direction-stillwater/`):
+
+| File | Written by | Holds |
+|---|---|---|
+| `direction.json` | you | brief, mood, feature thinking, progress (`references/direction-format.md`) |
+| `tokens.json` | you, Phase 2 | the design tokens (`references/tokens-format.md`) |
+| `board.html` | generator | the visual direction board: Mood → Spec → Features, light/dark |
+| `tokens.css`, `tailwind.css` | generator | developer exports |
+| `design-direction-<slug>.md` | generator | the whole direction as one shareable document |
+
+**Build after every change** to either JSON file. This skill's directory is the base directory shown
+when the skill loads:
+
+```bash
+node <skill-base-dir>/scripts/build.js design-direction-<slug>/
+```
+
+- **Exit 0:** done. It prints the palette and contrast tables (once tokens exist) and the files written.
+- **Exit 1:** a contrast pair failed (listed as `FAIL ...`). Adjust that color's lightness, keeping
+  its hue, and build again until it exits 0. Never present failing values.
+- **Exit 2:** a JSON file is invalid (listed as `ERROR ...` with the exact field). Fix it and build again.
+
+**Open the board** after each phase: `open design-direction-<slug>/board.html` on macOS, `xdg-open`
+on Linux; if you can't, give the user the path. The board grows phase by phase, shows progress in
+its header, and has a light/dark toggle — chat stays a short summary.
+
+**Keep `status` accurate** (see the Status table in `references/direction-format.md`): mark each
+approval, and when an approved phase is revised, add the later approved phases to `needsReview`.
+Log every approval and revision.
+
+**If Node isn't available**, follow the fallback in `references/tokens-format.md`.
+
+Never hand-edit the generated files.
+
+---
+
+## Before you start
+
+Look for an existing `design-direction-*/direction.json` in the current working directory.
+
+- **None found:** start Phase 1.
+- **Found, and the user is clearly starting a different product:** start Phase 1 for the new one in
+  its own folder.
+- **Found otherwise:** read it (and `tokens.json` if present) and offer to pick up where they left
+  off, in one short message — e.g.
+
+  > "I found your **Stillwater** direction — mood approved, spec in review, features not started.
+  > Want to **continue** from the spec, **revise** something, or **start fresh**?"
+
+  - **Continue:** resume at the first phase that isn't approved, following that phase's steps.
+  - **Revise:** make the change in the right JSON file, update `status` and the log, build, and
+    re-present only what changed.
+  - **Start fresh:** begin Phase 1. Never delete or overwrite the old folder; if the product name is
+    the same, use a new slug (e.g. `stillwater-v2`).
+
+Never re-run the intake for a direction that already has an approved mood.
 
 ---
 
@@ -61,46 +123,41 @@ If the user mentions a reference (a brand, app, or product they admire), use it 
 Deconstruct what makes it work visually and emotionally, then build a new direction inspired by
 it — not a copy of it.
 
-Once you have all five answers (a "no references" answer counts), produce the Mood Brief using this
-exact format:
+Once you have all five answers (a "no references" answer counts):
+
+1. **Read `<skill-base-dir>/references/direction-format.md`**, then write
+   `design-direction-<slug>/direction.json` with `product`, `references`, `mood` and
+   `status: { "phase": 1, "approved": [] }`.
+2. **Build** and **open the board**.
+3. **Present this summary in chat** — the board carries the swatches, the type pairing preview and
+   the do's and don'ts:
 
 ---
 
-### Mood Brief: [Product Name or short descriptor]
+### Mood Brief: [Product Name]
 
-**Tone Words**
-[3–5 adjectives that define the personality. Examples: quiet confidence · organic warmth · editorial restraint]
+**Tone Words:** [word] · [word] · [word]
 
 **Color Story**
-Present 2–3 palette directions. For each:
-- **Name:** [e.g. "Warm Stone"]
-- **Feeling:** [1–2 sentences on why it fits — reference the audience and product]
-- **Direction:** [general description of hue/temperature/saturation — no hex codes yet]
+- **[Palette name]** — [one line on the feeling]
+- *(2–3 directions)*
 
-**Typography Personality**
-- Serif or sans-serif (or a mix)? Why does it fit?
-- Weight feel — light and airy, bold and confident, something in between?
-- One pairing suggestion (e.g. "A humanist serif for headlines + a geometric sans for body")
+**Typography:** [pairing]
 
-**Visual Do's**
-- [3 specific rules for what to embrace]
+> [Design manifesto, 3–4 sentences]
 
-**Visual Don'ts**
-- [3 specific rules for what to avoid]
-
-**Design Manifesto**
-[3–4 sentences. Write it like something a designer would pin above their desk. Capture the full
-direction — the audience, the feeling, the visual philosophy.]
+The full brief — swatches, type pairing, do's and don'ts — is on the board:
+`design-direction-<slug>/board.html`
 
 ---
 
-After presenting the Mood Brief, ask:
+Then ask:
 
 > "Does this mood feel like the direction you had in mind? Anything feels off or needs adjusting
 > before I build out the concrete spec?"
 
-Wait for explicit approval. If the user wants changes, revise the brief and ask again.
-Do not proceed to Phase 2 until the user says yes.
+Wait for explicit approval. If the user wants changes, update `direction.json`, build, and ask
+again. Do not proceed to Phase 2 until the user says yes.
 
 ---
 
@@ -109,39 +166,15 @@ Do not proceed to Phase 2 until the user says yes.
 Derive all values directly from the approved Mood Brief. Do not ask more questions.
 The brief contains everything you need — translate feeling into numbers.
 
-### Generate tokens and the style tile
-
-The spec is built from one source of truth, `tokens.json`. A generator script in this skill turns it
-into a visual style tile and developer-ready exports, so what the designer sees is exactly what the
-developer gets.
-
-1. **Read `<skill-base-dir>/references/tokens-format.md`**, then **write
-   `design-direction-<slug>/tokens.json`** in the current working directory, where `<slug>` is the
-   product name in kebab-case (e.g. `design-direction-stillwater/`). The reference has the exact
-   shape, every required key, and how to write `meta.copy` in the product's voice.
-
-2. **Run the generator.** This skill's directory is the base directory shown when the skill loads:
-
-   ```bash
-   node <skill-base-dir>/scripts/build.js design-direction-<slug>/tokens.json
-   ```
-
-   It writes `style-tile.html`, `tokens.css` (CSS variables, light and dark) and `tailwind.css` (a
-   Tailwind v4 `@theme`) next to `tokens.json`. It also prints the Color Palette and Contrast Check
-   tables as markdown.
-   - **Exit 1:** a contrast pair failed (listed as `FAIL ...`). Adjust that color's lightness, keeping
-     its hue, and run again. Repeat until it exits 0. Never present failing values.
-   - **Exit 2:** `tokens.json` is invalid (listed as `ERROR ...`). Fix it and run again.
-
-3. **Present the spec** in the format below. Paste the two tables the generator printed exactly as
+1. **Record the approval:** add `1` to `status.approved`, set `status.phase` to `2`, log it.
+   If there is no `direction.json` yet (the user arrived with an already-approved brief), first
+   create it from that brief with `approved: [1]`.
+2. **Read `<skill-base-dir>/references/tokens-format.md`**, then write
+   `design-direction-<slug>/tokens.json` — exact shape, every required key, and how to write
+   `meta.copy` in the product's voice.
+3. **Build** until it exits 0, then **open the board**.
+4. **Present the spec** in the format below. Paste the two tables the generator printed exactly as
    printed, then write the remaining sections.
-
-4. **Open the style tile:** `open design-direction-<slug>/style-tile.html` on macOS, `xdg-open` on
-   Linux. If you can't open it, give the user the path. Tell them it has a light/dark toggle.
-
-**If Node isn't available**, follow the fallback in `references/tokens-format.md`.
-
-**Revisions:** edit `tokens.json` and re-run the generator. Never hand-edit the generated files.
 
 Present the spec using this exact format:
 
@@ -225,46 +258,56 @@ Scale: `[4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96]`
 
 Close the spec with the generated files:
 
-> **Files** — `design-direction-<slug>/`: `style-tile.html` · `tokens.css` · `tailwind.css` · `tokens.json`
+> **Files** — `design-direction-<slug>/`: `board.html` · `tokens.json` · `tokens.css` · `tailwind.css`
 
-After presenting the Spec and opening the style tile, ask:
+Then ask:
 
-> "Take a look at the style tile — flip it to dark mode too. Does this match the direction we landed
-> on? Anything to tweak — colors feel off, type scale too big or small, anything like that?"
+> "Take a look at the Spec section of the board — flip it to dark mode too. Does this match the
+> direction we landed on? Anything to tweak — colors feel off, type scale too big or small?"
 
-Wait for explicit approval. If the user wants changes, revise and ask again.
-Do not proceed to Phase 3 until the user says yes.
+Wait for explicit approval. If the user wants changes, edit `tokens.json`, build, and present what
+changed. Do not proceed to Phase 3 until the user says yes.
 
 ---
 
 ## Phase 3 — Feature Thinking
 
-Using the approved Mood Brief, Spec, and the product description, generate all three sections
-(user flows, feature ideas, interaction concepts) as one cohesive output. Everything should feel like it belongs to the same product — tie
-back to the tone words and audience from Phase 1.
+Using the approved Mood Brief, Spec, and the product description, think through user flows, feature
+ideas and interaction concepts as one cohesive whole. Everything should feel like it belongs to the
+same product — tie back to the tone words and audience from Phase 1.
 
----
-
-Read `<skill-base-dir>/references/feature-thinking.md` and present Feature Thinking in exactly that
-format: 2–3 user flows, 5 feature ideas (each with an effort label), and 5–7 interaction concepts.
-
----
-
-After presenting Feature Thinking, ask:
+1. **Record the approval:** add `2` to `status.approved`, set `status.phase` to `3`, log it.
+2. **Read `<skill-base-dir>/references/feature-thinking.md`**, then add `features` to
+   `direction.json`: 2–3 user flows, exactly 5 feature ideas (each with an effort), and 5–7
+   interaction concepts.
+3. **Build** and **open the board** at its Features section.
+4. **Present the chat summary** from `references/feature-thinking.md`, then ask:
 
 > "Does this feature direction feel aligned with where you want to take the product?
 > Anything you want to add, cut, or explore deeper?"
+
+Wait for explicit approval. If the user wants changes, update `features`, build, and ask again.
 
 ---
 
 ## Closing
 
-Once the user approves Phase 3, offer to save everything:
+When the user approves Phase 3, add `3` to `status.approved`, log it, and build once more. Then
+tell them where everything is:
 
-> "You now have a complete design direction — mood brief, concrete spec, and feature thinking.
-> Want me to save it all as a single shareable markdown file you can drop into Figma notes,
-> a Notion doc, or hand to a developer?"
+> "Your design direction is complete and saved in `design-direction-<slug>/`: `board.html` to
+> share or present, `design-direction-<slug>.md` for Figma notes, Notion or a developer, and
+> `tokens.css` / `tailwind.css` / `tokens.json` to build with. Come back any time — I'll pick up
+> right where we left off."
 
-If yes, compile Phases 1–3 into a single clean document and save it as
-`design-direction-<slug>/design-direction-<slug>-[YYYY-MM-DD].md`, next to the style tile and token
-files, so the whole direction lives in one folder.
+---
+
+## Revisions
+
+At any point, the user can change anything already approved:
+
+1. Edit the right file — `direction.json` for brief, mood or features; `tokens.json` for the spec.
+2. Update `status`: add every *later* approved phase to `needsReview` (e.g. changing the mood puts
+   an approved spec into review), and log the change with before → after where useful.
+3. Build, then present only what changed and ask whether the later phases still hold. When the user
+   re-approves a phase, remove it from `needsReview`.

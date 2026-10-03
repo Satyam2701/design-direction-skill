@@ -118,7 +118,7 @@ const tests = {
   "description is at most 400 characters and covers key triggers"() {
     const { description } = parseFrontmatter(SKILL);
     assert.ok(description.length <= 400, `description is ${description.length} chars`);
-    for (const phrase of ["style guide", "moodboard", "brand direction", "color palette", "style tile"]) {
+    for (const phrase of ["style guide", "moodboard", "brand direction", "color palette", "direction board"]) {
       assert.ok(description.includes(phrase), `description missing "${phrase}"`);
     }
   },
@@ -138,16 +138,26 @@ const tests = {
     assert.ok(SKILL.includes("Compute, never estimate"), "missing compute-not-estimate rule");
   },
 
-  "Phase 2 generates tokens and the style tile via build.js"() {
-    for (const marker of ["scripts/build.js", "tokens.json", "style-tile.html", "tokens.css", "tailwind.css", "design-direction-<slug>/"]) {
+  "SKILL.md drives the direction folder and board"() {
+    for (const marker of ["scripts/build.js", "direction.json", "tokens.json", "board.html", "tokens.css", "tailwind.css", "design-direction-<slug>/", "needsReview"]) {
       assert.ok(SKILL.includes(marker), `SKILL.md missing "${marker}"`);
     }
+    assert.ok(!SKILL.includes("style-tile.html"), "SKILL.md still mentions style-tile.html");
+  },
+
+  "SKILL.md checks for a saved direction before starting"() {
+    assert.ok(SKILL.includes("## Before you start"), "missing Before you start section");
+    const start = SKILL.slice(SKILL.indexOf("## Before you start"), SKILL.indexOf("## Phase 1"));
+    assert.match(start, /design-direction-\*\/direction\.json/);
+    assert.match(start, /continue/i);
+    assert.match(start, /start fresh/i);
   },
 
   "reference files exist and SKILL.md tells Claude when to read them"() {
     const refs = {
       "references/tokens-format.md": ['"$extensions"', "on-primary", "meta.copy", "If Node isn't available"],
-      "references/feature-thinking.md": ["#### User Flows", "#### Feature Ideas", "- Effort:", "#### Interaction & UX Concepts"],
+      "references/feature-thinking.md": ['"flows"', '"ideas"', '"effort"', "Quick win", '"interactions"', "### Feature Thinking:"],
+      "references/direction-format.md": ['"product"', '"palettes"', '"swatches"', '"status"', '"needsReview"', '"log"'],
     };
     for (const [rel, markers] of Object.entries(refs)) {
       const file = path.join(__dirname, "..", "skills", "design-direction", rel);
@@ -161,7 +171,7 @@ const tests = {
   "installs reference files"() {
     const box = sandbox();
     run(box);
-    for (const rel of ["references/tokens-format.md", "references/feature-thinking.md"]) {
+    for (const rel of ["references/tokens-format.md", "references/feature-thinking.md", "references/direction-format.md"]) {
       assert.ok(fs.existsSync(path.join(box.project, ".claude", "skills", "design-direction", rel)), `${rel} not installed`);
     }
   },
