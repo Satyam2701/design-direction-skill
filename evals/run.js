@@ -132,7 +132,8 @@ async function main() {
   const jobs = selected.flatMap((s) =>
     Array.from({ length: opts.runs }, (_, r) => async () => {
       const res = await runScenario(s, r + 1);
-      console.log(`${res.pass ? "✓" : "✗"} ${s.id} #${r + 1}${res.pass ? "" : `  (${res.dir})`}`);
+      // Print reasons immediately so an interrupted run still explains its failures
+      console.log(`${res.pass ? "✓" : "✗"} ${s.id} #${r + 1}${res.pass ? "" : `  (${res.dir})\n    ${res.failures.join("\n    ")}`}`);
       return res;
     })
   );
