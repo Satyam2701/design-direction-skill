@@ -145,9 +145,22 @@ Revisions regenerate the files, so the tile always matches the spec. Drop the ma
 
 ---
 
+## Testing
+
+```bash
+npm test                      # installer, generator, and eval-helper unit tests (fast, no network)
+npm run eval                  # behavioral evals: real Claude Code sessions against scenarios
+npm run eval -- --runs 3      # each scenario 3×; passes if 2 of 3 runs pass (use before releases)
+npm run eval -- --only full-flow
+```
+
+`npm run eval` drives headless Claude Code (`claude -p`) through five scenarios — smart intake, quick mode, the Phase 1 approval gate, a low-contrast "pastel" brief, and a four-turn flow from spec to saved document — and grades each turn with code checks (valid tokens, passing contrast, files written) plus an LLM rubric for judgment calls like brand voice. Each run uses a throwaway project with only this skill installed; your own skills, plugins, hooks, and MCP servers are excluded. It uses your logged-in Claude Code, so it counts toward your plan's usage (a single pass takes a few minutes). Failed runs print the path to a full transcript.
+
+---
+
 ## Releasing
 
-Publishing is automated via [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) — no tokens or 2FA prompts.
+Publishing is automated via [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) — no tokens or 2FA prompts. Run `npm run eval -- --runs 3` first.
 
 ```bash
 npm version patch   # bumps package.json, commits, and tags vX.Y.Z
